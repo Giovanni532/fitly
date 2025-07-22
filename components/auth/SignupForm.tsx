@@ -178,8 +178,8 @@ export function SignupForm() {
                                 <Card className="w-full shadow-none border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl">
                                     <CardContent className="p-6 space-y-6">
                                         {/* Champs nom et prénom */}
-                                        <View className="flex-row space-x-3">
-                                            <View className="flex-1 space-y-2">
+                                        <View className="flex-row space-x-3 mb-4">
+                                            <View className="flex-1 space-y-2 pr-2 w-full">
                                                 <Label nativeID="firstName" className="text-gray-700 dark:text-gray-200 font-medium text-sm mb-2">
                                                     Prénom
                                                 </Label>
@@ -194,7 +194,7 @@ export function SignupForm() {
                                                     placeholderTextColor="#9CA3AF"
                                                 />
                                             </View>
-                                            <View className="flex-1 space-y-2">
+                                            <View className="flex-1 space-y-2 pl-2 w-full">
                                                 <Label nativeID="lastName" className="text-gray-700 dark:text-gray-200 font-medium text-sm mb-2">
                                                     Nom
                                                 </Label>
