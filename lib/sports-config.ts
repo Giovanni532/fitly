@@ -215,7 +215,27 @@ export function calculatePoints(sport: string, duration: string, intensity: 'lig
 function parseDurationToMinutes(duration: string): number {
     const cleanDuration = duration.toLowerCase().trim();
 
-    // Patterns pour détecter les heures et minutes
+    // Pattern pour détecter "1h30" ou "1h30min" ou "1:30"
+    const combinedPattern = /(\d+)\s*h\s*(\d+)(?:\s*min)?/i;
+    const combinedMatch = cleanDuration.match(combinedPattern);
+
+    if (combinedMatch) {
+        const hours = parseInt(combinedMatch[1]);
+        const minutes = parseInt(combinedMatch[2]);
+        return hours * 60 + minutes;
+    }
+
+    // Pattern pour détecter "1:30" (format avec deux-points)
+    const colonPattern = /(\d+):(\d+)/;
+    const colonMatch = cleanDuration.match(colonPattern);
+
+    if (colonMatch) {
+        const hours = parseInt(colonMatch[1]);
+        const minutes = parseInt(colonMatch[2]);
+        return hours * 60 + minutes;
+    }
+
+    // Patterns pour détecter les heures et minutes séparément
     const hourPattern = /(\d+)\s*h/i;
     const minutePattern = /(\d+)\s*min/i;
 

@@ -111,7 +111,7 @@ export function AddActivityModal({ visible, onClose, onAdd }: AddActivityModalPr
                             <TextInput
                                 value={duration}
                                 onChangeText={setDuration}
-                                placeholder="Ex: 1h, 30min, 1h30, 45min..."
+                                placeholder="Ex: 1h, 30min, 1h30, 1:30, 45min..."
                                 className="bg-gray-100 rounded-xl p-4 text-gray-800 text-base"
                                 placeholderTextColor="#9CA3AF"
                             />
