@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
 import { useHomeData } from '@/hooks/useHomeData';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, AppState, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomePage() {
     const { user } = useAuth();
@@ -20,6 +21,7 @@ export default function HomePage() {
         addActivity,
         getTodaysChallenge,
         resetDailyData,
+        refreshData,
     } = useHomeData();
 
     const [showAddModal, setShowAddModal] = useState(false);
@@ -48,6 +50,45 @@ export default function HomePage() {
             }),
         ]).start();
     }, []);
+
+    // Vérifier si c'est un nouveau jour et mettre à jour les données
+    useEffect(() => {
+        const checkNewDay = async () => {
+            try {
+                const now = new Date();
+                const today = now.toDateString();
+
+                // Vérifier si on a déjà traité aujourd'hui
+                const lastCheck = await AsyncStorage.getItem('lastDayCheck');
+
+                if (lastCheck !== today) {
+                    // C'est un nouveau jour, rafraîchir les données
+                    console.log('Nouveau jour détecté, mise à jour des données...');
+                    await refreshData();
+                    await AsyncStorage.setItem('lastDayCheck', today);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la vérification du nouveau jour:', error);
+            }
+        };
+
+        // Vérifier immédiatement
+        checkNewDay();
+
+        // Écouter les changements d'état de l'app
+        const handleAppStateChange = (nextAppState: string) => {
+            if (nextAppState === 'active') {
+                // L'app devient active, vérifier si c'est un nouveau jour
+                checkNewDay();
+            }
+        };
+
+        const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            subscription?.remove();
+        };
+    }, [refreshData]);
 
     // Fonction pour obtenir le nom d'affichage
     const getDisplayName = () => {
