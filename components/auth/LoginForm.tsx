@@ -22,11 +22,11 @@ import {
 const { width } = Dimensions.get('window');
 
 export function LoginForm() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const { login } = useAuth();
+    const { login, signInWithGoogle } = useAuth();
 
     // Animations avec useRef pour éviter les re-créations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -62,7 +62,7 @@ export function LoginForm() {
     }, []);
 
     const handleLogin = async () => {
-        if (!username.trim() || !password.trim()) {
+        if (!email.trim() || !password.trim()) {
             Alert.alert('Erreur', 'Veuillez remplir tous les champs');
             return;
         }
@@ -84,9 +84,9 @@ export function LoginForm() {
         ]).start();
 
         try {
-            const success = await login(username, password);
-            if (!success) {
-                Alert.alert('Erreur', 'Identifiants incorrects');
+            const result = await login(email, password);
+            if (!result.success) {
+                Alert.alert('Erreur', result.error || 'Identifiants incorrects');
             }
         } catch (error) {
             Alert.alert('Erreur', 'Une erreur est survenue');
@@ -95,8 +95,15 @@ export function LoginForm() {
         }
     };
 
-    const handleGoogleLogin = () => {
-        Alert.alert('Connexion Google', 'Fonctionnalité de connexion Google à implémenter');
+    const handleGoogleLogin = async () => {
+        try {
+            const result = await signInWithGoogle();
+            if (!result.success) {
+                Alert.alert('Erreur', result.error || 'Erreur lors de la connexion Google');
+            }
+        } catch (error) {
+            Alert.alert('Erreur', 'Une erreur est survenue');
+        }
     };
 
     return (
@@ -144,19 +151,20 @@ export function LoginForm() {
                         >
                             <Card className="w-full shadow-none border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl">
                                 <CardContent className="p-6 space-y-6">
-                                    {/* Champ username */}
+                                    {/* Champ email */}
                                     <View className="space-y-2 mb-4">
-                                        <Label nativeID="username" className="text-gray-700 dark:text-gray-200 font-medium text-sm mb-2">
-                                            Nom d'utilisateur
+                                        <Label nativeID="email" className="text-gray-700 dark:text-gray-200 font-medium text-sm mb-2">
+                                            Email
                                         </Label>
                                         <View className="relative">
                                             <Input
-                                                nativeID="username"
-                                                placeholder="Entrez votre nom d'utilisateur"
-                                                value={username}
-                                                onChangeText={setUsername}
+                                                nativeID="email"
+                                                placeholder="Entrez votre email"
+                                                value={email}
+                                                onChangeText={setEmail}
                                                 autoCapitalize="none"
                                                 autoCorrect={false}
+                                                keyboardType="email-address"
                                                 className="h-14 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl px-4 text-base"
                                                 placeholderTextColor="#9CA3AF"
                                             />
@@ -175,6 +183,15 @@ export function LoginForm() {
                                                 value={password}
                                                 onChangeText={setPassword}
                                                 secureTextEntry={!showPassword}
+                                                textContentType="none"
+                                                autoComplete="off"
+                                                autoCorrect={false}
+                                                autoCapitalize="none"
+                                                spellCheck={false}
+                                                passwordRules=""
+                                                enablesReturnKeyAutomatically={false}
+                                                returnKeyType="done"
+                                                blurOnSubmit={false}
                                                 className="h-14 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl px-4 pr-12 text-base"
                                                 placeholderTextColor="#9CA3AF"
                                             />

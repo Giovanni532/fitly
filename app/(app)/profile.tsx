@@ -34,6 +34,30 @@ export default function ProfilePage() {
         ]).start();
     }, []);
 
+    // Fonction pour obtenir le nom d'affichage
+    const getDisplayName = () => {
+        if (user?.firstName && user?.lastName) {
+            return `${user.firstName} ${user.lastName}`;
+        } else if (user?.displayName) {
+            return user.displayName;
+        } else if (user?.email) {
+            return user.email.split('@')[0];
+        }
+        return 'Utilisateur';
+    };
+
+    // Fonction pour obtenir l'initiale
+    const getInitial = () => {
+        if (user?.firstName) {
+            return user.firstName.charAt(0).toUpperCase();
+        } else if (user?.displayName) {
+            return user.displayName.charAt(0).toUpperCase();
+        } else if (user?.email) {
+            return user.email.charAt(0).toUpperCase();
+        }
+        return 'U';
+    };
+
     const handleLogout = () => {
         Alert.alert(
             'Déconnexion',
@@ -95,12 +119,17 @@ export default function ProfilePage() {
                     >
                         <View className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mb-4 shadow-lg">
                             <Text className="text-white text-3xl font-bold">
-                                {user?.username?.charAt(0).toUpperCase()}
+                                {getInitial()}
                             </Text>
                         </View>
                         <Text className="text-2xl font-bold text-gray-800 dark:text-white mb-1">
-                            {user?.username}
+                            {getDisplayName()}
                         </Text>
+                        {user?.dateOfBirth && (
+                            <Text className="text-gray-600 dark:text-gray-300 text-sm">
+                                Né(e) le {new Date(user.dateOfBirth).toLocaleDateString('fr-FR')}
+                            </Text>
+                        )}
                         <Badge className="bg-blue-100 dark:bg-blue-900/30">
                             <Text className="text-blue-700 dark:text-blue-300 text-sm font-medium">
                                 Membre actif

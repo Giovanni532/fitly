@@ -26,6 +26,18 @@ export default function HomePage() {
         ]).start();
     }, []);
 
+    // Fonction pour obtenir le nom d'affichage
+    const getDisplayName = () => {
+        if (user?.firstName && user?.lastName) {
+            return `${user.firstName} ${user.lastName}`;
+        } else if (user?.displayName) {
+            return user.displayName;
+        } else if (user?.email) {
+            return user.email.split('@')[0];
+        }
+        return 'Utilisateur';
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -39,7 +51,7 @@ export default function HomePage() {
                         className="items-center"
                     >
                         <Text className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
-                            Bonjour, {user?.username} !
+                            Bonjour, {getDisplayName()} !
                         </Text>
                         <Text className="text-gray-600 dark:text-gray-300 text-center">
                             Bienvenue sur Fitly
