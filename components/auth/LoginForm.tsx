@@ -1,0 +1,240 @@
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/auth-context';
+import { AntDesign } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    Animated,
+    Dimensions,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+export function LoginForm() {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const { login } = useAuth();
+
+    // Animations avec useRef pour éviter les re-créations
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(50)).current;
+    const scaleAnim = useRef(new Animated.Value(0.9)).current;
+    const logoScale = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        // Animation d'entrée
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 600,
+                useNativeDriver: true,
+            }),
+            Animated.spring(logoScale, {
+                toValue: 1,
+                tension: 100,
+                friction: 8,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, []);
+
+    const handleLogin = async () => {
+        if (!username.trim() || !password.trim()) {
+            Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+            return;
+        }
+
+        setIsLoading(true);
+
+        // Animation du bouton
+        Animated.sequence([
+            Animated.timing(scaleAnim, {
+                toValue: 0.95,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
+        try {
+            const success = await login(username, password);
+            if (!success) {
+                Alert.alert('Erreur', 'Identifiants incorrects');
+            }
+        } catch (error) {
+            Alert.alert('Erreur', 'Une erreur est survenue');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = () => {
+        Alert.alert('Connexion Google', 'Fonctionnalité de connexion Google à implémenter');
+    };
+
+    return (
+        <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                className="flex-1"
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView
+                    className="flex-1"
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View className="px-6 py-8">
+                        {/* Logo animé */}
+                        <Animated.View
+                            style={{
+                                transform: [{ scale: logoScale }],
+                                opacity: fadeAnim
+                            }}
+                            className="items-center mb-8"
+                        >
+                            <View className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl items-center justify-center mb-4 shadow-lg">
+                                <Text className="text-white text-2xl font-bold">F</Text>
+                            </View>
+                            <Text className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                                Fitly
+                            </Text>
+                            <Text className="text-gray-600 dark:text-gray-300 text-center">
+                                Connectez-vous à votre compte
+                            </Text>
+                        </Animated.View>
+
+                        {/* Formulaire animé */}
+                        <Animated.View
+                            style={{
+                                opacity: fadeAnim,
+                                transform: [
+                                    { translateY: slideAnim },
+                                    { scale: scaleAnim }
+                                ]
+                            }}
+                        >
+                            <Card className="w-full shadow-none border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl">
+                                <CardContent className="p-6 space-y-6">
+                                    {/* Champ username */}
+                                    <View className="space-y-2 mb-4">
+                                        <Label nativeID="username" className="text-gray-700 dark:text-gray-200 font-medium text-sm mb-2">
+                                            Nom d'utilisateur
+                                        </Label>
+                                        <View className="relative">
+                                            <Input
+                                                nativeID="username"
+                                                placeholder="Entrez votre nom d'utilisateur"
+                                                value={username}
+                                                onChangeText={setUsername}
+                                                autoCapitalize="none"
+                                                autoCorrect={false}
+                                                className="h-14 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl px-4 text-base"
+                                                placeholderTextColor="#9CA3AF"
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {/* Champ password */}
+                                    <View className="space-y-2 mb-4">
+                                        <Label nativeID="password" className="text-gray-700 dark:text-gray-200 font-medium text-sm mb-2">
+                                            Mot de passe
+                                        </Label>
+                                        <View className="relative">
+                                            <Input
+                                                nativeID="password"
+                                                placeholder="Entrez votre mot de passe"
+                                                value={password}
+                                                onChangeText={setPassword}
+                                                secureTextEntry={!showPassword}
+                                                className="h-14 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl px-4 pr-12 text-base"
+                                                placeholderTextColor="#9CA3AF"
+                                            />
+                                            <TouchableOpacity
+                                                onPress={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-0 bottom-0 justify-center"
+                                            >
+                                                <Text className="text-gray-500 text-sm">
+                                                    {showPassword ? 'Masquer' : 'Voir'}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+
+                                    {/* Bouton de connexion */}
+                                    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                                        <Button
+                                            onPress={handleLogin}
+                                            disabled={isLoading}
+                                            className="w-full my-2"
+                                        >
+                                            <Text className="text-white font-semibold text-base">
+                                                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
+                                            </Text>
+                                        </Button>
+                                    </Animated.View>
+
+                                    {/* Séparateur */}
+                                    <View className="flex-row items-center space-x-4 my-2">
+                                        <Separator className="flex-1 h-px bg-gray-200 dark:bg-gray-700 w-full mx-4" />
+                                        <Text className="text-gray-500 text-sm">ou</Text>
+                                        <Separator className="flex-1 h-px bg-gray-200 dark:bg-gray-700 w-full mx-4" />
+                                    </View>
+
+                                    {/* Bouton Google */}
+                                    <TouchableOpacity
+                                        onPress={handleGoogleLogin}
+                                        className="w-full h-14 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl flex-row items-center justify-center space-x-3 shadow-sm"
+                                    >
+                                        <AntDesign name="google" size={20} color="#000" />
+                                        <Text className="text-gray-700 dark:text-gray-200 font-medium text-base p-4">
+                                            Continuer avec Google
+                                        </Text>
+                                    </TouchableOpacity>
+                                </CardContent>
+                            </Card>
+                        </Animated.View>
+
+                        {/* Footer */}
+                        <Animated.View
+                            style={{ opacity: fadeAnim }}
+                            className="mt-8 items-center"
+                        >
+                            <Text className="text-gray-500 dark:text-gray-400 text-sm text-center">
+                                En vous connectant, vous acceptez nos conditions d'utilisation
+                            </Text>
+                        </Animated.View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+    );
+} 
