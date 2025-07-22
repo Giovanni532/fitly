@@ -1,26 +1,49 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ActivityItem } from '@/components/home/ActivityItem';
+import { AddActivityModal } from '@/components/home/AddActivityModal';
+import { ChallengeCard } from '@/components/home/ChallengeCard';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
+import { useHomeData } from '@/hooks/useHomeData';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react';
-import { Animated, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomePage() {
     const { user } = useAuth();
+    const {
+        challenges,
+        activities,
+        stats,
+        loading,
+        startChallenge,
+        completeChallenge,
+        addActivity,
+        getTodaysChallenge,
+        resetDailyData,
+    } = useHomeData();
+
+    const [showAddModal, setShowAddModal] = useState(false);
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
+    const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 600,
+                duration: 800,
                 useNativeDriver: true,
             }),
             Animated.timing(slideAnim, {
                 toValue: 0,
-                duration: 600,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 800,
                 useNativeDriver: true,
             }),
         ]).start();
@@ -38,105 +61,170 @@ export default function HomePage() {
         return 'Utilisateur';
     };
 
+    const todaysChallenge = getTodaysChallenge();
+
+    if (loading) {
+        return (
+            <SafeAreaView className="flex-1 bg-white">
+                <View className="flex-1 items-center justify-center">
+                    <View className="items-center">
+                        <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center mb-6">
+                            <Ionicons name="fitness" size={40} color="white" />
+                        </View>
+                        <Text className="text-gray-800 text-xl font-bold">
+                            Chargement...
+                        </Text>
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
-        <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <SafeAreaView className="flex-1 bg-white">
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                <View className="p-4 space-y-6 pb-20">
+                <View className="p-6 space-y-8 pb-24">
                     {/* Header avec salutation */}
                     <Animated.View
                         style={{
                             opacity: fadeAnim,
                             transform: [{ translateY: slideAnim }],
                         }}
-                        className="items-center"
+                        className="items-center mb-4"
                     >
-                        <Text className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                        <Text className="text-4xl font-bold text-gray-900 mb-3">
                             Bonjour, {getDisplayName()} !
                         </Text>
-                        <Text className="text-gray-600 dark:text-gray-300 text-center">
-                            Bienvenue sur Fitly
+                        <Text className="text-gray-600 text-lg text-center">
+                            Prêt pour une nouvelle journée ?
                         </Text>
                     </Animated.View>
 
-                    {/* Carte de bienvenue */}
+                    {/* Stats en haut */}
                     <Animated.View
                         style={{
                             opacity: fadeAnim,
                             transform: [{ translateY: slideAnim }],
                         }}
                     >
-                        <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 border-0 rounded-2xl shadow-lg">
-                            <CardContent className="p-6">
+                        <View className="flex-row space-x-4 mb-8">
+                            {/* Points */}
+                            <View className="flex-1 bg-blue-500 rounded-2xl p-4 shadow-lg mr-4">
                                 <View className="flex-row items-center justify-between">
-                                    <View className="flex-1">
-                                        <Text className="text-white text-xl font-semibold mb-2">
-                                            Commencez votre voyage
+                                    <View>
+                                        <Text className="text-white text-sm font-medium opacity-90">
+                                            Points du jour
                                         </Text>
-                                        <Text className="text-blue-100 text-sm">
-                                            Votre application de fitness personnalisée
+                                        <Text className="text-white text-2xl font-bold">
+                                            {stats.totalPoints}
                                         </Text>
                                     </View>
-                                    <View className="w-16 h-16 bg-white/20 rounded-full items-center justify-center">
-                                        <Ionicons name="fitness-outline" size={30} color="white" />
+                                    <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
+                                        <Ionicons name="star" size={24} color="white" />
                                     </View>
                                 </View>
-                            </CardContent>
-                        </Card>
+                            </View>
+
+                            {/* Streak */}
+                            <View className="flex-1 bg-orange-500 rounded-2xl p-4 shadow-lg">
+                                <View className="flex-row items-center justify-between">
+                                    <View>
+                                        <Text className="text-white text-sm font-medium opacity-90">
+                                            Streak
+                                        </Text>
+                                        <Text className="text-white text-2xl font-bold">
+                                            {stats.streak}
+                                        </Text>
+                                    </View>
+                                    <View className="w-12 h-12 bg-white/20 rounded-full items-center justify-center">
+                                        <Ionicons name="flame" size={24} color="white" />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
                     </Animated.View>
 
-                    {/* Informations */}
+                    {/* Défi du jour */}
+                    <Animated.View
+                        style={{
+                            opacity: fadeAnim,
+                            transform: [{ translateY: slideAnim }],
+                        }}
+                        className="mb-8"
+                    >
+                        <View className="flex-row items-center justify-between mb-6">
+                            <Text className="text-2xl font-bold text-gray-900">
+                                Défi du jour 🎯
+                            </Text>
+                            <TouchableOpacity
+                                onPress={resetDailyData}
+                                className="w-10 h-10 bg-red-500 rounded-full items-center justify-center"
+                            >
+                                <Ionicons name="refresh" size={20} color="white" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {todaysChallenge && (
+                            <ChallengeCard
+                                challenge={todaysChallenge}
+                                onStart={startChallenge}
+                                onComplete={completeChallenge}
+                            />
+                        )}
+                    </Animated.View>
+
+                    {/* Activités du jour */}
                     <Animated.View
                         style={{
                             opacity: fadeAnim,
                             transform: [{ translateY: slideAnim }],
                         }}
                     >
-                        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 rounded-2xl">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-lg text-gray-800 dark:text-white">
-                                    À propos de Fitly
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <View className="flex-row items-center space-x-3">
-                                    <View className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full items-center justify-center">
-                                        <Ionicons name="checkmark" size={16} color="#10B981" />
+                        <View className="flex-row items-center justify-between mb-6">
+                            <Text className="text-2xl font-bold text-gray-900">
+                                Activités 🏋️
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => setShowAddModal(true)}
+                                className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center"
+                            >
+                                <Ionicons name="add" size={20} color="white" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                            <CardContent className="p-4">
+                                {activities.length > 0 ? (
+                                    <View>
+                                        {activities.map((activity) => (
+                                            <ActivityItem key={activity.id} activity={activity} />
+                                        ))}
                                     </View>
-                                    <Text className="text-gray-700 dark:text-gray-200">
-                                        Authentification sécurisée
-                                    </Text>
-                                </View>
-                                <View className="flex-row items-center space-x-3">
-                                    <View className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center">
-                                        <Ionicons name="shield-checkmark" size={16} color="#3B82F6" />
+                                ) : (
+                                    <View className="py-12 items-center">
+                                        <View className="w-20 h-20 bg-gray-100 rounded-full items-center justify-center mb-6">
+                                            <Ionicons name="fitness-outline" size={40} color="#9CA3AF" />
+                                        </View>
+                                        <Text className="text-gray-600 text-lg font-medium mb-3">
+                                            Aucune activité
+                                        </Text>
+                                        <Text className="text-gray-500 text-center">
+                                            Ajoute ta première activité pour commencer !
+                                        </Text>
                                     </View>
-                                    <Text className="text-gray-700 dark:text-gray-200">
-                                        Navigation protégée
-                                    </Text>
-                                </View>
-                                <View className="flex-row items-center space-x-3">
-                                    <View className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full items-center justify-center">
-                                        <Ionicons name="sparkles" size={16} color="#8B5CF6" />
-                                    </View>
-                                    <Text className="text-gray-700 dark:text-gray-200">
-                                        Interface moderne et animée
-                                    </Text>
-                                </View>
+                                )}
                             </CardContent>
                         </Card>
-                    </Animated.View>
-
-                    {/* Version */}
-                    <Animated.View
-                        style={{ opacity: fadeAnim }}
-                        className="items-center pt-4"
-                    >
-                        <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                            Fitly v1.0.0
-                        </Text>
                     </Animated.View>
                 </View>
             </ScrollView>
+
+            {/* Modal pour ajouter une activité */}
+            <AddActivityModal
+                visible={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onAdd={addActivity}
+            />
         </SafeAreaView>
     );
 } 
