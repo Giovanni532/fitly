@@ -21,14 +21,16 @@ export function useHomeData() {
             try {
                 setLoading(true);
 
-                // Charger les défis et activités
-                const [loadedChallenges, loadedActivities] = await Promise.all([
-                    StorageService.getChallenges(),
-                    StorageService.getActivities(),
+                // Charger les défis quotidiens et activités du jour
+                const [loadedDailyActivities] = await Promise.all([
+                    StorageService.getDailyActivities(),
                 ]);
 
-                // Mettre à jour le streak
-                const currentStreak = await StorageService.updateStreak();
+                // Générer les défis du jour
+                const loadedChallenges = StorageService.getDailyChallenges();
+
+                // Calculer le streak basé sur les dates réelles
+                const currentStreak = await StorageService.calculateStreakFromDates();
 
                 // Marquer les défis complétés aujourd'hui
                 const today = StorageService.getTodayString();
@@ -41,14 +43,14 @@ export function useHomeData() {
                 }));
 
                 setChallenges(updatedChallenges);
-                setActivities(loadedActivities);
+                setActivities(loadedDailyActivities);
 
                 // Calculer les statistiques
-                updateStats(updatedChallenges, loadedActivities, currentStreak);
+                updateStats(updatedChallenges, loadedDailyActivities, currentStreak);
 
                 console.log('Données chargées avec succès:', {
                     challenges: updatedChallenges.length,
-                    activities: loadedActivities.length,
+                    dailyActivities: loadedDailyActivities.length,
                     streak: currentStreak
                 });
 
@@ -61,8 +63,8 @@ export function useHomeData() {
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                // En cas d'erreur, utiliser les données par défaut
-                const defaultChallenges = StorageService.getDefaultChallenges();
+                // En cas d'erreur, utiliser les défis quotidiens
+                const defaultChallenges = StorageService.getDailyChallenges();
                 setChallenges(defaultChallenges);
                 setActivities([]);
                 updateStats(defaultChallenges, [], 0);
@@ -79,8 +81,8 @@ export function useHomeData() {
         // Timeout de sécurité
         timeoutId = setTimeout(() => {
             if (loading) {
-                console.log('Timeout de chargement, utilisation des données par défaut');
-                const defaultChallenges = StorageService.getDefaultChallenges();
+                console.log('Timeout de chargement, utilisation des défis quotidiens');
+                const defaultChallenges = StorageService.getDailyChallenges();
                 setChallenges(defaultChallenges);
                 setActivities([]);
                 updateStats(defaultChallenges, [], 0);
@@ -97,16 +99,18 @@ export function useHomeData() {
         };
     }, []);
 
-
-
-    const updateStats = (currentChallenges: Challenge[], currentActivities: Activity[], streak: number) => {
-        const totalPoints = currentActivities.reduce((sum, activity) => sum + activity.points, 0) +
+    const updateStats = async (currentChallenges: Challenge[], currentActivities: Activity[], streak: number) => {
+        // Calculer les points du jour (activités + défis complétés)
+        const dailyPoints = currentActivities.reduce((sum, activity) => sum + activity.points, 0) +
             currentChallenges.filter(c => c.completed).reduce((sum, challenge) => sum + challenge.points, 0);
+
+        // Récupérer les points totaux
+        const totalPoints = await StorageService.getTotalPoints();
 
         const challengesCompleted = currentChallenges.filter(c => c.completed).length;
 
         setStats({
-            totalPoints,
+            totalPoints: totalPoints + dailyPoints, // Points totaux + points du jour
             streak,
             activitiesCount: currentActivities.length,
             challengesCompleted,
@@ -120,10 +124,12 @@ export function useHomeData() {
 
     const completeChallenge = async (challengeId: string) => {
         try {
-            // Marquer le défi comme complété
+            const today = StorageService.getTodayString();
+
+            // Marquer le défi comme complété avec la date
             const updatedChallenges = challenges.map(challenge =>
                 challenge.id === challengeId
-                    ? { ...challenge, completed: true }
+                    ? { ...challenge, completed: true, doAtThisDate: today }
                     : challenge
             );
 
@@ -131,7 +137,6 @@ export function useHomeData() {
             await StorageService.saveChallenges(updatedChallenges);
 
             // Sauvegarder le défi complété pour aujourd'hui
-            const today = StorageService.getTodayString();
             const completedChallenges = await StorageService.getCompletedChallenges();
             const todaysCompleted = completedChallenges[today] || [];
 
@@ -140,8 +145,14 @@ export function useHomeData() {
                 await StorageService.saveCompletedChallenges(completedChallenges);
             }
 
-            // Mettre à jour le streak
-            const newStreak = await StorageService.updateStreak();
+            // Ajouter les points du défi aux points totaux
+            const challenge = updatedChallenges.find(c => c.id === challengeId);
+            if (challenge) {
+                await StorageService.addPoints(challenge.points);
+            }
+
+            // Recalculer le streak basé sur les nouvelles données
+            const newStreak = await StorageService.calculateStreakFromDates();
 
             setChallenges(updatedChallenges);
             updateStats(updatedChallenges, activities, newStreak);
@@ -150,21 +161,31 @@ export function useHomeData() {
         }
     };
 
-    const addActivity = async (activity: Omit<Activity, 'id' | 'createdAt'>) => {
+    const addActivity = async (activity: Omit<Activity, 'id' | 'createdAt' | 'doAtThisDate'>) => {
         try {
+            const today = StorageService.getTodayString();
+
             const newActivity: Activity = {
                 ...activity,
                 id: Date.now().toString(),
                 createdAt: new Date(),
+                doAtThisDate: today,
             };
 
             const updatedActivities = [newActivity, ...activities];
 
-            // Sauvegarder les activités
-            await StorageService.saveActivities(updatedActivities);
+            // Sauvegarder les activités du jour
+            await StorageService.saveDailyActivities(updatedActivities);
 
-            // Mettre à jour le streak
-            const newStreak = await StorageService.updateStreak();
+            // Ajouter aux activités historiques
+            const allActivities = await StorageService.getActivities();
+            await StorageService.saveActivities([newActivity, ...allActivities]);
+
+            // Ajouter les points aux points totaux
+            await StorageService.addPoints(newActivity.points);
+
+            // Recalculer le streak basé sur les nouvelles données
+            const newStreak = await StorageService.calculateStreakFromDates();
 
             setActivities(updatedActivities);
             updateStats(challenges, updatedActivities, newStreak);
@@ -194,6 +215,42 @@ export function useHomeData() {
         }
     };
 
+    const refreshData = async () => {
+        try {
+            setLoading(true);
+
+            // Vérifier si c'est un nouveau jour et réinitialiser si nécessaire
+            await StorageService.resetDailyData();
+
+            const [loadedDailyActivities] = await Promise.all([
+                StorageService.getDailyActivities(),
+            ]);
+
+            // Générer les défis du jour
+            const loadedChallenges = StorageService.getDailyChallenges();
+
+            // Recalculer le streak basé sur les dates réelles
+            const currentStreak = await StorageService.calculateStreakFromDates();
+
+            const today = StorageService.getTodayString();
+            const completedChallenges = await StorageService.getCompletedChallenges();
+            const todaysCompleted = completedChallenges[today] || [];
+
+            const updatedChallenges = loadedChallenges.map(challenge => ({
+                ...challenge,
+                completed: todaysCompleted.includes(challenge.id),
+            }));
+
+            setChallenges(updatedChallenges);
+            setActivities(loadedDailyActivities);
+            updateStats(updatedChallenges, loadedDailyActivities, currentStreak);
+            setLoading(false);
+        } catch (error) {
+            console.error('Erreur lors du rechargement:', error);
+            setLoading(false);
+        }
+    };
+
     return {
         challenges,
         activities,
@@ -204,36 +261,6 @@ export function useHomeData() {
         addActivity,
         getTodaysChallenge,
         resetDailyData,
-        refreshData: () => {
-            const loadDataWithTimeout = async () => {
-                try {
-                    setLoading(true);
-
-                    const [loadedChallenges, loadedActivities] = await Promise.all([
-                        StorageService.getChallenges(),
-                        StorageService.getActivities(),
-                    ]);
-
-                    const currentStreak = await StorageService.updateStreak();
-                    const today = StorageService.getTodayString();
-                    const completedChallenges = await StorageService.getCompletedChallenges();
-                    const todaysCompleted = completedChallenges[today] || [];
-
-                    const updatedChallenges = loadedChallenges.map(challenge => ({
-                        ...challenge,
-                        completed: todaysCompleted.includes(challenge.id),
-                    }));
-
-                    setChallenges(updatedChallenges);
-                    setActivities(loadedActivities);
-                    updateStats(updatedChallenges, loadedActivities, currentStreak);
-                    setLoading(false);
-                } catch (error) {
-                    console.error('Erreur lors du rechargement:', error);
-                    setLoading(false);
-                }
-            };
-            loadDataWithTimeout();
-        },
+        refreshData,
     };
 } 

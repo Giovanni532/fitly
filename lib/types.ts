@@ -5,6 +5,7 @@ export interface Challenge {
     completed: boolean;
     points: number;
     createdAt: Date;
+    doAtThisDate?: string; // Date au format YYYY-MM-DD quand le défi a été complété
 }
 
 export interface Activity {
@@ -14,6 +15,7 @@ export interface Activity {
     intensity: 'light' | 'moderate' | 'intense';
     points: number;
     createdAt: Date;
+    doAtThisDate: string; // Date au format YYYY-MM-DD quand l'activité a été faite
 }
 
 export interface DailyStats {

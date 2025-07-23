@@ -8,7 +8,7 @@ import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'reac
 interface AddActivityModalProps {
     visible: boolean;
     onClose: () => void;
-    onAdd: (activity: Omit<Activity, 'id' | 'createdAt'>) => void;
+    onAdd: (activity: Omit<Activity, 'id' | 'createdAt' | 'doAtThisDate'>) => void;
 }
 
 export function AddActivityModal({ visible, onClose, onAdd }: AddActivityModalProps) {
