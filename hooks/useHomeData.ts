@@ -106,13 +106,13 @@ export function useHomeData() {
         const dailyPoints = currentActivities.reduce((sum, activity) => sum + activity.points, 0) +
             currentChallenges.filter(c => c.completed).reduce((sum, challenge) => sum + challenge.points, 0);
 
-        // Récupérer les points totaux
+        // Récupérer les points totaux (qui incluent déjà les points du jour)
         const totalPoints = await StorageService.getTotalPoints();
 
         const challengesCompleted = currentChallenges.filter(c => c.completed).length;
 
         setStats({
-            totalPoints: totalPoints + dailyPoints, // Points totaux + points du jour
+            totalPoints: totalPoints, // Utiliser directement les points totaux sans ajouter les points du jour
             streak,
             activitiesCount: currentActivities.length,
             challengesCompleted,
