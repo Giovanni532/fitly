@@ -27,4 +27,37 @@ export interface DailyStats {
     streak: number;
     activitiesCount: number;
     challengesCompleted: number;
+}
+
+export interface Badge {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    unlocked: boolean;
+    unlockedAt?: string; // Date au format YYYY-MM-DD quand le badge a été débloqué
+    rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+
+export interface WeeklyActivityData {
+    day: string;
+    active: boolean;
+    activities: number;
+}
+
+export interface ActivityDistributionData {
+    name: string;
+    value: number;
+    color: string;
+}
+
+export interface Statistics {
+    totalPoints: number;
+    totalBadges: number;
+    currentStreak: number;
+    totalTrainingTime: number;
+    activeDaysThisWeek: number;
+    weeklyData: WeeklyActivityData[];
+    activityDistribution: ActivityDistributionData[];
+    badges: Badge[];
 } 

@@ -32,6 +32,17 @@ export function BottomNavbar({ activeTab, onTabPress }: BottomNavbarProps) {
             ),
         },
         {
+            id: 'statistics',
+            label: 'Stats',
+            icon: (active: boolean) => (
+                <Ionicons
+                    name={active ? 'analytics' : 'analytics-outline'}
+                    size={24}
+                    color={active ? '#3B82F6' : '#6B7280'}
+                />
+            ),
+        },
+        {
             id: 'profile',
             label: 'Profil',
             icon: (active: boolean) => (

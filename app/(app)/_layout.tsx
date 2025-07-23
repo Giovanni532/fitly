@@ -6,6 +6,7 @@ import { View } from 'react-native';
 import ChallengesPage from './challenges';
 import HomePage from './home';
 import ProfilePage from './profile';
+import StatisticsPage from './statistics';
 
 export default function AppLayout() {
     const [activeTab, setActiveTab] = useState('home');
@@ -22,6 +23,8 @@ export default function AppLayout() {
                 return <HomePage />;
             case 'challenges':
                 return <ChallengesPage />;
+            case 'statistics':
+                return <StatisticsPage />;
             case 'profile':
                 return <ProfilePage />;
             default:
