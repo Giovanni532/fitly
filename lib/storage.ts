@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NotificationService } from './notifications';
 import { Activity, Challenge } from './types';
 
 const STORAGE_KEYS = {
@@ -211,6 +212,17 @@ export class StorageService {
             // Mettre à jour le streak si nécessaire
             await this.updateStreakFromActivity(today);
 
+            // Envoyer une notification de félicitations
+            await NotificationService.sendChallengeCompletedNotification(challenge.name, challenge.points);
+
+            // Vérifier si l'utilisateur a atteint un nouveau niveau
+            const previousLevel = Math.floor((newTotalPoints - challenge.points) / 100) + 1;
+            const newLevel = Math.floor(newTotalPoints / 100) + 1;
+
+            if (newLevel > previousLevel) {
+                await NotificationService.sendLevelUpNotification(newLevel);
+            }
+
             return { success: true, pointsEarned: challenge.points };
         } catch (error) {
             console.error('Erreur lors de la completion du défi:', error);
@@ -227,8 +239,14 @@ export class StorageService {
             if (!lastActivityDate || lastActivityDate === yesterday) {
                 // Nouveau streak ou continuation
                 const currentStreak = await this.getStreak();
-                await this.saveStreak(currentStreak + 1);
+                const newStreak = currentStreak + 1;
+                await this.saveStreak(newStreak);
                 await this.saveLastActivityDate(activityDate);
+
+                // Envoyer une notification pour les streaks importants
+                if (newStreak === 7 || newStreak === 14 || newStreak === 30 || newStreak % 10 === 0) {
+                    await NotificationService.sendStreakNotification(newStreak);
+                }
             } else if (lastActivityDate !== activityDate) {
                 // Nouvelle activité après une pause
                 await this.saveStreak(1);

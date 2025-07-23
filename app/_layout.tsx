@@ -1,6 +1,7 @@
 import { Loading } from '@/components/ui/loading';
 import { AuthProvider, useAuth } from '@/contexts/auth-context';
 import { ThemeProvider, useTheme } from '@/contexts/theme-context';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Redirect, Stack } from 'expo-router';
 import { View } from 'react-native';
 import './global.css';
@@ -18,9 +19,10 @@ export default function RootLayout() {
 function AppContent() {
   const { activeTheme } = useTheme();
   const { user, isLoading } = useAuth();
+  const { isInitialized: notificationsInitialized } = useNotifications();
 
-  if (isLoading) {
-    return <Loading message="Vérification de l'authentification..." />;
+  if (isLoading || !notificationsInitialized) {
+    return <Loading message="Chargement de l'application..." />;
   }
 
   return (

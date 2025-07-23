@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
 import { useTheme } from '@/contexts/theme-context';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useProfileData } from '@/hooks/useProfileData';
+import { NotificationService } from '@/lib/notifications';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, SafeAreaView, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
@@ -10,12 +12,76 @@ export default function ProfilePage() {
     const { user, logout } = useAuth();
     const { theme, setTheme } = useTheme();
     const { stats, loading, resetProgress } = useProfileData();
+    const { sendTestNotification, scheduleTestReminder } = useNotifications();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
     const scaleAnim = useRef(new Animated.Value(0.9)).current;
+
+    // Charger les préférences de notification au démarrage
+    useEffect(() => {
+        const loadNotificationPreferences = async () => {
+            try {
+                const enabled = await NotificationService.areNotificationsEnabled();
+                setNotificationsEnabled(enabled);
+            } catch (error) {
+                console.error('Erreur lors du chargement des préférences de notification:', error);
+            } finally {
+                setIsLoadingNotifications(false);
+            }
+        };
+
+        loadNotificationPreferences();
+    }, []);
+
+    // Sauvegarder les préférences de notification
+    const handleNotificationToggle = async (value: boolean) => {
+        try {
+            const success = await NotificationService.setNotificationsEnabled(value);
+
+            if (success) {
+                setNotificationsEnabled(value);
+
+                // Feedback utilisateur
+                if (value) {
+                    Alert.alert(
+                        'Notifications activées',
+                        'Vous recevrez maintenant des notifications pour vos défis et activités.'
+                    );
+
+                    // Configurer les notifications par défaut
+                    await NotificationService.setupDefaultNotifications();
+                } else {
+                    Alert.alert(
+                        'Notifications désactivées',
+                        'Vous ne recevrez plus de notifications.'
+                    );
+                }
+            } else {
+                // Si l'activation a échoué (probablement pas de permissions)
+                Alert.alert(
+                    'Permissions requises',
+                    'Pour recevoir des notifications, veuillez autoriser les notifications dans les paramètres de votre appareil.',
+                    [
+                        { text: 'OK', style: 'default' },
+                        {
+                            text: 'Paramètres',
+                            onPress: () => {
+                                // Ici vous pourriez ouvrir les paramètres de l'app
+                                console.log('Ouvrir les paramètres');
+                            }
+                        }
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Erreur lors de la configuration des notifications:', error);
+            Alert.alert('Erreur', 'Impossible de configurer les notifications.');
+        }
+    };
 
     useEffect(() => {
         Animated.parallel([
@@ -105,6 +171,24 @@ export default function ProfilePage() {
         );
     };
 
+    const handleTestNotification = async () => {
+        try {
+            await sendTestNotification();
+            Alert.alert('Test envoyé', 'Une notification de test a été envoyée !');
+        } catch (error) {
+            Alert.alert('Erreur', 'Impossible d\'envoyer la notification de test.');
+        }
+    };
+
+    const handleTestReminder = async () => {
+        try {
+            await scheduleTestReminder();
+            Alert.alert('Rappel programmé', 'Un rappel de test sera envoyé dans 5 secondes !');
+        } catch (error) {
+            Alert.alert('Erreur', 'Impossible de programmer le rappel de test.');
+        }
+    };
+
     const profileStats = [
         { label: 'Niveau', value: stats.currentLevel.toString(), icon: 'star-outline', color: '#F59E0B' },
         { label: 'Points', value: stats.totalPoints.toString(), icon: 'trophy-outline', color: '#10B981' },
@@ -112,31 +196,53 @@ export default function ProfilePage() {
         { label: 'Activités', value: stats.totalActivities.toString(), icon: 'fitness-outline', color: '#8B5CF6' },
     ];
 
-    const settingsItems = [
-        {
-            title: 'Notifications',
-            icon: 'notifications-outline',
-            type: 'switch' as const,
-            value: notificationsEnabled,
-            onValueChange: setNotificationsEnabled,
-        },
-        {
-            title: 'Thème sombre',
-            icon: 'moon-outline',
-            type: 'switch' as const,
-            value: theme === 'dark',
-            onValueChange: (value: boolean) => {
-                setTheme(value ? 'dark' : 'light');
+    const settingsItems: Array<{
+        title: string;
+        icon: string;
+        type: 'switch' | 'button';
+        value?: boolean;
+        onValueChange?: (value: boolean) => void;
+        onPress?: () => void;
+        destructive?: boolean;
+        disabled?: boolean;
+    }> = [
+            {
+                title: 'Notifications',
+                icon: 'notifications-outline',
+                type: 'switch',
+                value: notificationsEnabled,
+                onValueChange: handleNotificationToggle,
+                disabled: isLoadingNotifications,
             },
-        },
-        {
-            title: 'Réinitialiser la progression',
-            icon: 'refresh-outline',
-            type: 'button' as const,
-            onPress: handleResetProgress,
-            destructive: true,
-        },
-    ];
+            {
+                title: 'Thème sombre',
+                icon: 'moon-outline',
+                type: 'switch',
+                value: theme === 'dark',
+                onValueChange: (value: boolean) => {
+                    setTheme(value ? 'dark' : 'light');
+                },
+            },
+            {
+                title: 'Test notification',
+                icon: 'flash-outline',
+                type: 'button',
+                onPress: handleTestNotification,
+            },
+            {
+                title: 'Test rappel',
+                icon: 'time-outline',
+                type: 'button',
+                onPress: handleTestReminder,
+            },
+            {
+                title: 'Réinitialiser la progression',
+                icon: 'refresh-outline',
+                type: 'button',
+                onPress: handleResetProgress,
+                destructive: true,
+            },
+        ];
 
     if (loading) {
         return (
@@ -304,7 +410,9 @@ export default function ProfilePage() {
                                             />
                                             <Text className={`font-medium ${item.destructive
                                                 ? 'text-red-600 dark:text-red-400'
-                                                : 'text-gray-700 dark:text-gray-200'
+                                                : item.disabled
+                                                    ? 'text-gray-400 dark:text-gray-500'
+                                                    : 'text-gray-700 dark:text-gray-200'
                                                 }`}>
                                                 {item.title}
                                             </Text>
@@ -315,6 +423,7 @@ export default function ProfilePage() {
                                                 onValueChange={item.onValueChange}
                                                 trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
                                                 thumbColor={item.value ? '#FFFFFF' : '#FFFFFF'}
+                                                disabled={item.disabled}
                                             />
                                         ) : (
                                             <TouchableOpacity
