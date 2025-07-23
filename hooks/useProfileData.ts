@@ -12,6 +12,22 @@ export interface ProfileStats {
     badges: Badge[];
 }
 
+// Callback pour notifier les autres hooks
+type OnDataChangeCallback = () => void;
+
+let dataChangeCallbacks: OnDataChangeCallback[] = [];
+
+export function registerDataChangeCallback(callback: OnDataChangeCallback) {
+    dataChangeCallbacks.push(callback);
+    return () => {
+        dataChangeCallbacks = dataChangeCallbacks.filter(cb => cb !== callback);
+    };
+}
+
+export function notifyDataChange() {
+    dataChangeCallbacks.forEach(callback => callback());
+}
+
 export function useProfileData() {
     const [stats, setStats] = useState<ProfileStats>({
         totalPoints: 0,
@@ -135,17 +151,11 @@ export function useProfileData() {
 
     const resetProgress = async () => {
         try {
-            // Réinitialiser tous les points
-            await StorageService.saveTotalPoints(0);
+            // Réinitialiser complètement toutes les données utilisateur
+            await StorageService.resetAllUserData();
 
-            // Réinitialiser toutes les activités
-            await StorageService.saveActivities([]);
-
-            // Réinitialiser tous les défis
-            await StorageService.resetAllChallenges();
-
-            // Réinitialiser le streak
-            await StorageService.saveStreak(0);
+            // Notifier les autres hooks du changement
+            notifyDataChange();
 
             // Recharger les données
             await loadProfileData();

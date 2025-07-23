@@ -1,6 +1,7 @@
 import { StorageService } from '@/lib/storage';
 import { Activity, Challenge, DailyStats } from '@/lib/types';
 import { useEffect, useState } from 'react';
+import { registerDataChangeCallback } from './useProfileData';
 
 export function useHomeData() {
     const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -88,6 +89,16 @@ export function useHomeData() {
                 clearTimeout(timeoutId);
             }
         };
+    }, []);
+
+    // Écouter les changements de données depuis useProfileData
+    useEffect(() => {
+        const unsubscribe = registerDataChangeCallback(() => {
+            // Recharger les données quand elles changent
+            refreshData();
+        });
+
+        return unsubscribe;
     }, []);
 
     const updateStats = async (currentChallenges: Challenge[], currentActivities: Activity[], streak: number) => {
@@ -201,9 +212,7 @@ export function useHomeData() {
         try {
             setLoading(true);
 
-            // Vérifier si c'est un nouveau jour et réinitialiser si nécessaire
-            await StorageService.resetDailyData();
-
+            // Charger toutes les données depuis le stockage
             const [loadedDailyActivities] = await Promise.all([
                 StorageService.getDailyActivities(),
             ]);

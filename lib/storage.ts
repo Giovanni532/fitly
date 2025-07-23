@@ -673,4 +673,35 @@ export class StorageService {
             return 0;
         }
     }
+
+    // Réinitialiser complètement toutes les données utilisateur
+    static async resetAllUserData(): Promise<void> {
+        try {
+            // Supprimer toutes les clés de stockage liées aux données utilisateur
+            const keysToRemove = [
+                STORAGE_KEYS.CHALLENGES,
+                STORAGE_KEYS.ACTIVITIES,
+                STORAGE_KEYS.TOTAL_POINTS,
+                STORAGE_KEYS.STREAK,
+                STORAGE_KEYS.LAST_ACTIVITY_DATE,
+                STORAGE_KEYS.COMPLETED_CHALLENGES,
+            ];
+
+            // Supprimer les activités quotidiennes pour toutes les dates
+            const allKeys = await AsyncStorage.getAllKeys();
+            const dailyActivityKeys = allKeys.filter(key =>
+                key.startsWith(STORAGE_KEYS.DAILY_ACTIVITIES)
+            );
+
+            // Combiner toutes les clés à supprimer
+            const allKeysToRemove = [...keysToRemove, ...dailyActivityKeys];
+
+            // Supprimer toutes les clés en une seule opération
+            await AsyncStorage.multiRemove(allKeysToRemove);
+
+            console.log('Toutes les données utilisateur ont été réinitialisées');
+        } catch (error) {
+            console.error('Erreur lors de la réinitialisation complète des données:', error);
+        }
+    }
 } 
