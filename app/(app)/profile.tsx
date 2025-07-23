@@ -1,12 +1,16 @@
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/auth-context';
+import { useTheme } from '@/contexts/theme-context';
+import { useProfileData } from '@/hooks/useProfileData';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react';
-import { Alert, Animated, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, SafeAreaView, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
+    const { theme, setTheme } = useTheme();
+    const { stats, loading, resetProgress } = useProfileData();
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -76,40 +80,77 @@ export default function ProfilePage() {
         );
     };
 
+    const handleResetProgress = () => {
+        Alert.alert(
+            'Réinitialiser la progression',
+            'Êtes-vous sûr de vouloir réinitialiser toute votre progression ? Cette action est irréversible.',
+            [
+                {
+                    text: 'Annuler',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Réinitialiser',
+                    style: 'destructive',
+                    onPress: async () => {
+                        const success = await resetProgress();
+                        if (success) {
+                            Alert.alert('Succès', 'Progression réinitialisée');
+                        } else {
+                            Alert.alert('Erreur', 'Impossible de réinitialiser la progression');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const profileStats = [
-        { label: 'Jours actifs', value: '7', icon: 'calendar-outline' },
-        { label: 'Objectifs', value: '3', icon: 'flag-outline' },
-        { label: 'Succès', value: '12', icon: 'trophy-outline' },
+        { label: 'Niveau', value: stats.currentLevel.toString(), icon: 'star-outline', color: '#F59E0B' },
+        { label: 'Points', value: stats.totalPoints.toString(), icon: 'trophy-outline', color: '#10B981' },
+        { label: 'Défis', value: stats.totalChallenges.toString(), icon: 'flag-outline', color: '#3B82F6' },
+        { label: 'Activités', value: stats.totalActivities.toString(), icon: 'fitness-outline', color: '#8B5CF6' },
     ];
 
-    const menuItems = [
-        {
-            title: 'Paramètres du compte',
-            icon: 'settings-outline',
-            onPress: () => Alert.alert('Paramètres', 'Fonctionnalité à venir'),
-        },
+    const settingsItems = [
         {
             title: 'Notifications',
             icon: 'notifications-outline',
-            onPress: () => Alert.alert('Notifications', 'Fonctionnalité à venir'),
+            type: 'switch' as const,
+            value: notificationsEnabled,
+            onValueChange: setNotificationsEnabled,
         },
         {
-            title: 'Aide et support',
-            icon: 'help-circle-outline',
-            onPress: () => Alert.alert('Aide', 'Fonctionnalité à venir'),
+            title: 'Thème sombre',
+            icon: 'moon-outline',
+            type: 'switch' as const,
+            value: theme === 'dark',
+            onValueChange: (value: boolean) => setTheme(value ? 'dark' : 'light'),
         },
         {
-            title: 'À propos',
-            icon: 'information-circle-outline',
-            onPress: () => Alert.alert('À propos', 'Fitly v1.0.0'),
+            title: 'Réinitialiser la progression',
+            icon: 'refresh-outline',
+            type: 'button' as const,
+            onPress: handleResetProgress,
+            destructive: true,
         },
     ];
 
+    if (loading) {
+        return (
+            <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+                <View className="flex-1 items-center justify-center">
+                    <Text className="text-gray-600 dark:text-gray-300">Chargement du profil...</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
-        <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <View className="p-4 space-y-6">
-                    {/* Header avec avatar */}
+                    {/* Header avec avatar et niveau */}
                     <Animated.View
                         style={{
                             opacity: fadeAnim,
@@ -117,24 +158,33 @@ export default function ProfilePage() {
                         }}
                         className="items-center mb-6"
                     >
-                        <View className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mb-4 shadow-lg">
-                            <Text className="text-white text-3xl font-bold">
-                                {getInitial()}
-                            </Text>
+                        <View className="relative">
+                            <View className="w-24 h-24 bg-gray-200 dark:bg-gray-600/30 rounded-full items-center justify-center ">
+                                <Text className="text-gray-900 dark:text-white text-3xl font-bold">
+                                    {getInitial()}
+                                </Text>
+                            </View>
+                            {/* Badge de niveau */}
+                            <View className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-400 dark:bg-yellow-500 rounded-full items-center justify-center border-2 border-white dark:border-gray-800">
+                                <Text className="text-white text-xs font-bold">{stats.currentLevel}</Text>
+                            </View>
                         </View>
-                        <Text className="text-2xl font-bold text-gray-800 dark:text-white mb-1">
+                        <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                             {getDisplayName()}
                         </Text>
-                        {user?.dateOfBirth && (
-                            <Text className="text-gray-600 dark:text-gray-300 text-sm">
-                                Né(e) le {new Date(user.dateOfBirth).toLocaleDateString('fr-FR')}
-                            </Text>
-                        )}
-                        <Badge className="bg-blue-100 dark:bg-blue-900/30">
-                            <Text className="text-blue-700 dark:text-blue-300 text-sm font-medium">
-                                Membre actif
-                            </Text>
-                        </Badge>
+                        <Text className="text-gray-600 dark:text-gray-300 text-sm mb-2">
+                            Niveau {stats.currentLevel} • {stats.totalPoints} points
+                        </Text>
+                        {/* Barre de progression du niveau */}
+                        <View className="w-48 h-2 bg-gray-200 dark:bg-gray-700 rounded-full mb-3">
+                            <View
+                                className="h-2 bg-gradient-to-r from-amber-400 to-amber-500 dark:from-yellow-400 dark:to-yellow-600 rounded-full"
+                                style={{ width: `${stats.progressToNextLevel * 100}%` }}
+                            />
+                        </View>
+                        <Text className="text-xs text-gray-500 dark:text-gray-400">
+                            {100 - (stats.totalPoints % 100)} points pour le niveau {stats.currentLevel + 1}
+                        </Text>
                     </Animated.View>
 
                     {/* Statistiques */}
@@ -144,7 +194,7 @@ export default function ProfilePage() {
                             transform: [{ translateY: slideAnim }],
                         }}
                     >
-                        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 rounded-2xl">
+                        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 rounded-2xl my-4">
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-lg text-gray-800 dark:text-white">
                                     Statistiques
@@ -154,11 +204,14 @@ export default function ProfilePage() {
                                 <View className="flex-row justify-around">
                                     {profileStats.map((stat, index) => (
                                         <View key={index} className="items-center space-y-2">
-                                            <View className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center">
+                                            <View
+                                                className="w-12 h-12 rounded-full items-center justify-center"
+                                                style={{ backgroundColor: `${stat.color}20` }}
+                                            >
                                                 <Ionicons
                                                     name={stat.icon as any}
                                                     size={20}
-                                                    color="#3B82F6"
+                                                    color={stat.color}
                                                 />
                                             </View>
                                             <Text className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -174,43 +227,105 @@ export default function ProfilePage() {
                         </Card>
                     </Animated.View>
 
-                    {/* Menu */}
+                    {/* Badges */}
                     <Animated.View
                         style={{
                             opacity: fadeAnim,
                             transform: [{ translateY: slideAnim }],
                         }}
                     >
-                        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 rounded-2xl mt-4">
+                        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 rounded-2xl my-4">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-lg text-gray-800 dark:text-white">
+                                    Badges obtenus
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <View className="flex-row flex-wrap justify-center gap-3">
+                                    {stats.badges.map((badge, index) => (
+                                        <View
+                                            key={badge.id}
+                                            className={`items-center p-3 rounded-xl ${badge.unlocked
+                                                ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20'
+                                                : 'bg-gray-100 dark:bg-gray-700'
+                                                }`}
+                                            style={{ opacity: badge.unlocked ? 1 : 0.5 }}
+                                        >
+                                            <View
+                                                className={`w-12 h-12 rounded-full items-center justify-center mb-2 ${badge.unlocked ? '' : 'bg-gray-300 dark:bg-gray-600'
+                                                    }`}
+                                                style={badge.unlocked ? { backgroundColor: getBadgeColor(badge.rarity) + '20' } : {}}
+                                            >
+                                                <Ionicons
+                                                    name={badge.icon as any}
+                                                    size={24}
+                                                    color={badge.unlocked ? getBadgeColor(badge.rarity) : '#9CA3AF'}
+                                                />
+                                            </View>
+                                            <Text className={`text-xs font-medium text-center ${badge.unlocked
+                                                ? 'text-gray-800 dark:text-white'
+                                                : 'text-gray-500 dark:text-gray-400'
+                                                }`}>
+                                                {badge.name}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </CardContent>
+                        </Card>
+                    </Animated.View>
+
+                    {/* Paramètres */}
+                    <Animated.View
+                        style={{
+                            opacity: fadeAnim,
+                            transform: [{ translateY: slideAnim }],
+                        }}
+                    >
+                        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 rounded-2xl">
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-lg text-gray-800 dark:text-white">
                                     Paramètres
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                                {menuItems.map((item, index) => (
-                                    <TouchableOpacity
+                                {settingsItems.map((item, index) => (
+                                    <View
                                         key={index}
-                                        onPress={item.onPress}
-                                        className="flex-row items-center justify-between py-3 px-2 rounded-xl active:bg-gray-100 dark:active:bg-gray-700"
-                                        activeOpacity={0.7}
+                                        className="flex-row items-center justify-between py-3 px-2 rounded-xl"
                                     >
                                         <View className="flex-row items-center space-x-3">
                                             <Ionicons
                                                 name={item.icon as any}
                                                 size={20}
-                                                color="#6B7280"
+                                                color={item.destructive ? "#EF4444" : "#6B7280"}
                                             />
-                                            <Text className="text-gray-700 dark:text-gray-200 font-medium">
+                                            <Text className={`font-medium ${item.destructive
+                                                ? 'text-red-600 dark:text-red-400'
+                                                : 'text-gray-700 dark:text-gray-200'
+                                                }`}>
                                                 {item.title}
                                             </Text>
                                         </View>
-                                        <Ionicons
-                                            name="chevron-forward"
-                                            size={16}
-                                            color="#9CA3AF"
-                                        />
-                                    </TouchableOpacity>
+                                        {item.type === 'switch' ? (
+                                            <Switch
+                                                value={item.value}
+                                                onValueChange={item.onValueChange}
+                                                trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
+                                                thumbColor={item.value ? '#FFFFFF' : '#FFFFFF'}
+                                            />
+                                        ) : (
+                                            <TouchableOpacity
+                                                onPress={item.onPress}
+                                                className="px-3 py-1 rounded-lg bg-red-100 dark:bg-red-900/30"
+                                                activeOpacity={0.7}
+                                            >
+                                                <Text className="text-red-600 dark:text-red-400 text-sm font-medium">
+                                                    Réinitialiser
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
                                 ))}
                             </CardContent>
                         </Card>
@@ -250,4 +365,20 @@ export default function ProfilePage() {
             </ScrollView>
         </SafeAreaView>
     );
+}
+
+// Fonction utilitaire pour obtenir la couleur du badge selon sa rareté
+function getBadgeColor(rarity: 'common' | 'rare' | 'epic' | 'legendary'): string {
+    switch (rarity) {
+        case 'common':
+            return '#6B7280';
+        case 'rare':
+            return '#3B82F6';
+        case 'epic':
+            return '#8B5CF6';
+        case 'legendary':
+            return '#F59E0B';
+        default:
+            return '#6B7280';
+    }
 } 

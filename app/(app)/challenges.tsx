@@ -180,7 +180,7 @@ export default function ChallengesPage() {
             <ScrollView className="flex-1 px-4 pt-4">
                 {loading ? (
                     <View className="flex-1 justify-center items-center py-20">
-                        <Text className="text-gray-600 text-lg">Chargement des défis...</Text>
+                        <Text className="text-gray-600 dark:text-gray-300 text-lg">Chargement des défis...</Text>
                     </View>
                 ) : (
                     <>

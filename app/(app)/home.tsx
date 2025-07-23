@@ -105,13 +105,13 @@ export default function HomePage() {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-white">
+            <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
                 <View className="flex-1 items-center justify-center">
                     <View className="items-center">
                         <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center mb-6">
                             <Ionicons name="fitness" size={40} color="white" />
                         </View>
-                        <Text className="text-gray-800 text-xl font-bold">
+                        <Text className="text-gray-800 dark:text-white text-xl font-bold">
                             Chargement...
                         </Text>
                     </View>
@@ -121,7 +121,7 @@ export default function HomePage() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <View className="p-6 space-y-8 pb-24">
                     {/* Header avec salutation */}
@@ -132,10 +132,10 @@ export default function HomePage() {
                         }}
                         className="items-center mb-4"
                     >
-                        <Text className="text-4xl font-bold text-gray-900 mb-3">
+                        <Text className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
                             Bonjour, {getDisplayName()} !
                         </Text>
-                        <Text className="text-gray-600 text-lg text-center">
+                        <Text className="text-gray-600 dark:text-gray-300 text-lg text-center">
                             Prêt pour une nouvelle journée ?
                         </Text>
                     </Animated.View>
@@ -193,7 +193,7 @@ export default function HomePage() {
                         className="mb-8"
                     >
                         <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-2xl font-bold text-gray-900">
+                            <Text className="text-2xl font-bold text-gray-900 dark:text-white">
                                 Défi du jour 🎯
                             </Text>
                             <TouchableOpacity
@@ -221,7 +221,7 @@ export default function HomePage() {
                         }}
                     >
                         <View className="flex-row items-center justify-between mb-6">
-                            <Text className="text-2xl font-bold text-gray-900">
+                            <Text className="text-2xl font-bold text-gray-900 dark:text-white">
                                 Activités 🏋️
                             </Text>
                             <TouchableOpacity
@@ -232,7 +232,7 @@ export default function HomePage() {
                             </TouchableOpacity>
                         </View>
 
-                        <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
                             <CardContent className="p-4">
                                 {activities.length > 0 ? (
                                     <View>
@@ -242,13 +242,13 @@ export default function HomePage() {
                                     </View>
                                 ) : (
                                     <View className="py-12 items-center">
-                                        <View className="w-20 h-20 bg-gray-100 rounded-full items-center justify-center mb-6">
+                                        <View className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full items-center justify-center mb-6">
                                             <Ionicons name="fitness-outline" size={40} color="#9CA3AF" />
                                         </View>
-                                        <Text className="text-gray-600 text-lg font-medium mb-3">
+                                        <Text className="text-gray-600 dark:text-gray-300 text-lg font-medium mb-3">
                                             Aucune activité
                                         </Text>
-                                        <Text className="text-gray-500 text-center">
+                                        <Text className="text-gray-500 dark:text-gray-400 text-center">
                                             Ajoute ta première activité pour commencer !
                                         </Text>
                                     </View>

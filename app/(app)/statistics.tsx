@@ -21,35 +21,35 @@ function StatisticsHeader({ totalPoints, currentStreak, totalBadges }: {
     const year = currentDate.getFullYear();
 
     return (
-        <View className="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 px-4 pt-4 pb-6 rounded-b-3xl shadow-lg">
+        <View className="bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-500 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 px-4 pt-4 pb-6 rounded-b-3xl shadow-lg">
             {/* En-tête principal */}
             <View className="flex-row items-center justify-between mb-4">
                 <View>
-                    <Text className="text-2xl font-semibold mb-1 shadow-none">
+                    <Text className="text-2xl font-semibold mb-1 shadow-none text-black/80 dark:text-white ">
                         Mes Statistiques
                     </Text>
-                    <Text className="text-sm font-semibold shadow-none">
+                    <Text className="text-sm font-semibold shadow-none text-gray-500 dark:text-gray-300">
                         {monthName} {year}
                     </Text>
                 </View>
-                <View className="bg-white/20 rounded-full p-3">
-                    <Ionicons name="analytics" size={28} color="blue" />
+                <View className="bg-white/80 dark:bg-gray-600/30 rounded-full p-3">
+                    <Ionicons name="analytics" size={28} color="gray" />
                 </View>
             </View>
 
             {/* Cartes de statistiques rapides */}
             <View className="flex-row space-x-3 ">
                 {/* Points totaux */}
-                <Card className="flex-1 bg-white/20 border-0 m-2 bg-white shadow-none">
+                <Card className="flex-1 bg-white dark:bg-gray-600/30 border-0 m-2 shadow-none">
                     <CardContent className="p-3">
                         <View className="items-center">
-                            <View className="bg-yellow-400 rounded-full p-2 mb-2">
+                            <View className="bg-amber-400 dark:bg-yellow-500 rounded-full p-2 mb-2">
                                 <Ionicons name="star" size={16} color="white" />
                             </View>
-                            <Text className="text-lg font-bold">
+                            <Text className="text-lg font-bold text-gray-900 dark:text-white">
                                 {totalPoints.toLocaleString()}
                             </Text>
-                            <Text className="text-xs">
+                            <Text className="text-xs text-gray-500 dark:text-gray-300">
                                 Points
                             </Text>
                         </View>
@@ -57,16 +57,16 @@ function StatisticsHeader({ totalPoints, currentStreak, totalBadges }: {
                 </Card>
 
                 {/* Streak actuel */}
-                <Card className="flex-1 bg-white/20 border-0 m-2 bg-white shadow-none">
+                <Card className="flex-1 bg-white dark:bg-gray-600/30 border-0 m-2 shadow-none">
                     <CardContent className="p-3">
                         <View className="items-center">
-                            <View className="bg-red-400 rounded-full p-2 mb-2">
+                            <View className="bg-orange-400 dark:bg-red-500 rounded-full p-2 mb-2">
                                 <Ionicons name="flame" size={16} color="white" />
                             </View>
-                            <Text className="text-lg font-bold">
+                            <Text className="text-lg font-bold text-gray-900 dark:text-white">
                                 {currentStreak}
                             </Text>
-                            <Text className="text-xs">
+                            <Text className="text-xs text-gray-500 dark:text-gray-300">
                                 Jours
                             </Text>
                         </View>
@@ -74,16 +74,16 @@ function StatisticsHeader({ totalPoints, currentStreak, totalBadges }: {
                 </Card>
 
                 {/* Badges */}
-                <Card className="flex-1 bg-white/20 border-0 m-2 bg-white shadow-none">
+                <Card className="flex-1 bg-white dark:bg-gray-600/30 border-0 m-2 shadow-none">
                     <CardContent className="p-3">
                         <View className="items-center">
-                            <View className="bg-purple-400 rounded-full p-2 mb-2">
+                            <View className="bg-violet-400 dark:bg-purple-500 rounded-full p-2 mb-2">
                                 <Ionicons name="trophy" size={16} color="white" />
                             </View>
-                            <Text className="text-lg font-bold">
+                            <Text className="text-lg font-bold text-gray-900 dark:text-white">
                                 {totalBadges}
                             </Text>
-                            <Text className="text-xs">
+                            <Text className="text-xs text-gray-500 dark:text-gray-300">
                                 Badges
                             </Text>
                         </View>
@@ -92,8 +92,8 @@ function StatisticsHeader({ totalPoints, currentStreak, totalBadges }: {
             </View>
 
             {/* Message motivant */}
-            <View className="mt-4 bg-white/10 rounded-xl p-3">
-                <Text className="text-center text-sm font-medium">
+            <View className="mt-4 bg-white dark:bg-gray-600/30 rounded-xl p-3">
+                <Text className="text-center text-sm font-medium text-gray-900 dark:text-white">
                     {currentStreak > 0
                         ? `🔥 Incroyable ! Vous êtes actif depuis ${currentStreak} jour${currentStreak > 1 ? 's' : ''} !`
                         : "🚀 Commencez votre voyage fitness aujourd'hui !"
@@ -116,7 +116,7 @@ function TimeFilter({ selectedPeriod, onPeriodChange }: {
     ];
 
     return (
-        <View className="bg-white border border-gray-200 p-2 rounded-xl">
+        <View className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2 rounded-xl">
             <View className="flex-row">
                 {periods.map((period) => (
                     <View
@@ -140,7 +140,7 @@ function TimeFilter({ selectedPeriod, onPeriodChange }: {
                             <Text
                                 className={`text-center font-medium ${selectedPeriod === period.id
                                     ? 'text-white'
-                                    : 'text-gray-700'
+                                    : 'text-gray-700 dark:text-gray-300'
                                     }`}
                             >
                                 {period.label}
@@ -167,42 +167,42 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
             value: totalPoints.toLocaleString(),
             icon: 'star',
             color: 'text-yellow-600',
-            bgColor: 'bg-yellow-50'
+            bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
         },
         {
             title: 'Badges',
             value: totalBadges.toString(),
             icon: 'trophy',
             color: 'text-purple-600',
-            bgColor: 'bg-purple-50'
+            bgColor: 'bg-purple-50 dark:bg-purple-900/20'
         },
         {
             title: 'Streak actuel',
             value: `${currentStreak} jours`,
             icon: 'flame',
             color: 'text-red-600',
-            bgColor: 'bg-red-50'
+            bgColor: 'bg-red-50 dark:bg-red-900/20'
         },
         {
             title: 'Temps d\'entraînement',
             value: `${totalTrainingTime}h`,
             icon: 'time',
             color: 'text-blue-600',
-            bgColor: 'bg-blue-50'
+            bgColor: 'bg-blue-50 dark:bg-blue-900/20'
         },
         {
             title: 'Jours actifs',
             value: `${activeDaysThisWeek}/7`,
             icon: 'calendar',
             color: 'text-green-600',
-            bgColor: 'bg-green-50'
+            bgColor: 'bg-green-50 dark:bg-green-900/20'
         }
     ];
 
     return (
         <View className="space-y-3">
             {stats.map((stat, index) => (
-                <Card key={index} className="bg-white border border-gray-200 my-2">
+                <Card key={index} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 my-2">
                     <CardContent className="p-4">
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1">
@@ -210,7 +210,7 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
                                     <Ionicons name={stat.icon as any} size={24} className={stat.color} />
                                 </View>
                                 <View className="flex-1">
-                                    <Text className="text-gray-600 text-sm">
+                                    <Text className="text-gray-600 dark:text-gray-400 text-sm">
                                         {stat.title}
                                     </Text>
                                     <Text className={`text-2xl font-bold ${stat.color}`}>
@@ -231,7 +231,7 @@ function WeeklyActivityChart({ data }: { data: WeeklyActivityData[] }) {
     const maxActivities = Math.max(...data.map(d => d.activities));
 
     return (
-        <Card className="bg-white border border-gray-200">
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
                 <View className="flex-row items-end justify-between h-32">
                     {data.map((item, index) => (
@@ -240,7 +240,7 @@ function WeeklyActivityChart({ data }: { data: WeeklyActivityData[] }) {
                                 <View
                                     className={`w-full rounded-t-lg ${item.active
                                         ? 'bg-blue-500'
-                                        : 'bg-gray-200'
+                                        : 'bg-gray-200 dark:bg-gray-600'
                                         }`}
                                     style={{
                                         height: item.active
@@ -250,27 +250,27 @@ function WeeklyActivityChart({ data }: { data: WeeklyActivityData[] }) {
                                 />
                             </View>
 
-                            <Text className="text-xs text-gray-600 mb-1">
+                            <Text className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                                 {item.activities}
                             </Text>
 
-                            <Text className="text-xs font-medium text-gray-900">
+                            <Text className="text-xs font-medium text-gray-900 dark:text-white">
                                 {item.day}
                             </Text>
                         </View>
                     ))}
                 </View>
 
-                <View className="flex-row justify-center mt-4 pt-4 border-t border-gray-200">
+                <View className="flex-row justify-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <View className="flex-row items-center mr-6">
                         <View className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                        <Text className="text-xs text-gray-600">
+                        <Text className="text-xs text-gray-600 dark:text-gray-400">
                             Jours actifs
                         </Text>
                     </View>
                     <View className="flex-row items-center">
-                        <View className="w-3 h-3 bg-gray-200 rounded-full mr-2" />
-                        <Text className="text-xs text-gray-600">
+                        <View className="w-3 h-3 bg-gray-200 dark:bg-gray-600 rounded-full mr-2" />
+                        <Text className="text-xs text-gray-600 dark:text-gray-400">
                             Jours inactifs
                         </Text>
                     </View>
@@ -285,19 +285,19 @@ function ActivityDistributionChart({ data }: { data: ActivityDistributionData[] 
     const total = data.reduce((sum, item) => sum + item.value, 0);
 
     return (
-        <Card className="bg-white border border-gray-200">
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
                 <View className="space-y-3">
                     {data.map((item, index) => (
                         <View key={index} className="flex-row items-center">
                             <View className="w-20">
-                                <Text className="text-sm font-medium text-gray-900">
+                                <Text className="text-sm font-medium text-gray-900 dark:text-white">
                                     {item.name}
                                 </Text>
                             </View>
 
                             <View className="flex-1 mx-3">
-                                <View className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <View className="h-4 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                                     <View
                                         className="h-full rounded-full"
                                         style={{
@@ -309,7 +309,7 @@ function ActivityDistributionChart({ data }: { data: ActivityDistributionData[] 
                             </View>
 
                             <View className="w-12">
-                                <Text className="text-sm font-semibold text-gray-900 text-right">
+                                <Text className="text-sm font-semibold text-gray-900 dark:text-white text-right">
                                     {item.value}%
                                 </Text>
                             </View>
@@ -317,8 +317,8 @@ function ActivityDistributionChart({ data }: { data: ActivityDistributionData[] 
                     ))}
                 </View>
 
-                <View className="flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200">
-                    <Text className="text-sm font-medium text-gray-900">
+                <View className="flex-row justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <Text className="text-sm font-medium text-gray-900 dark:text-white">
                         Total
                     </Text>
                     <Text className="text-sm font-bold text-blue-600">
@@ -334,11 +334,11 @@ function ActivityDistributionChart({ data }: { data: ActivityDistributionData[] 
 function BadgesList({ badges }: { badges: Badge[] }) {
     const getRarityColor = (rarity: string) => {
         switch (rarity) {
-            case 'common': return 'text-gray-600';
+            case 'common': return 'text-gray-600 dark:text-gray-400';
             case 'rare': return 'text-blue-600';
             case 'epic': return 'text-purple-600';
             case 'legendary': return 'text-yellow-600';
-            default: return 'text-gray-600';
+            default: return 'text-gray-600 dark:text-gray-400';
         }
     };
 
@@ -354,14 +354,14 @@ function BadgesList({ badges }: { badges: Badge[] }) {
 
     const renderBadge = ({ item }: { item: Badge }) => (
         <Card className={`mb-3 border ${item.unlocked
-            ? 'bg-white border-gray-200'
-            : 'bg-gray-100 border-gray-300'
+            ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+            : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
             }`}>
             <CardContent className="p-4">
                 <View className="flex-row items-center">
                     <View className={`w-16 h-16 rounded-full items-center justify-center mr-4 ${item.unlocked
                         ? 'bg-gradient-to-br from-yellow-400 to-orange-500'
-                        : 'bg-gray-300'
+                        : 'bg-gray-300 dark:bg-gray-600'
                         }`}>
                         <Text className="text-2xl">
                             {item.icon}
@@ -371,8 +371,8 @@ function BadgesList({ badges }: { badges: Badge[] }) {
                     <View className="flex-1">
                         <View className="flex-row items-center mb-1">
                             <Text className={`text-lg font-bold ${item.unlocked
-                                ? 'text-gray-900'
-                                : 'text-gray-500'
+                                ? 'text-gray-900 dark:text-white'
+                                : 'text-gray-500 dark:text-gray-400'
                                 }`}>
                                 {item.name}
                             </Text>
@@ -387,8 +387,8 @@ function BadgesList({ badges }: { badges: Badge[] }) {
                         </View>
 
                         <Text className={`text-sm mb-2 ${item.unlocked
-                            ? 'text-gray-600'
-                            : 'text-gray-500'
+                            ? 'text-gray-600 dark:text-gray-300'
+                            : 'text-gray-500 dark:text-gray-400'
                             }`}>
                             {item.description}
                         </Text>
@@ -401,7 +401,7 @@ function BadgesList({ badges }: { badges: Badge[] }) {
                             </View>
 
                             {item.unlocked && item.unlockedAt && (
-                                <Text className="text-xs text-gray-500">
+                                <Text className="text-xs text-gray-500 dark:text-gray-400">
                                     Débloqué le {new Date(item.unlockedAt).toLocaleDateString('fr-FR')}
                                 </Text>
                             )}
@@ -426,17 +426,17 @@ function BadgesList({ badges }: { badges: Badge[] }) {
 // Composant État vide
 function EmptyStatsState() {
     return (
-        <Card className="bg-white border border-gray-200">
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-8 items-center">
                 <Ionicons name="analytics-outline" size={48} color="#9CA3AF" />
-                <Text className="text-gray-600 text-center mt-4 text-lg font-medium">
+                <Text className="text-gray-600 dark:text-gray-300 text-center mt-4 text-lg font-medium">
                     Aucune donnée disponible
                 </Text>
-                <Text className="text-gray-500 text-center text-sm mt-2">
+                <Text className="text-gray-500 dark:text-gray-400 text-center text-sm mt-2">
                     Commencez à faire des activités et complétez des défis pour voir vos statistiques
                 </Text>
-                <View className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <Text className="text-blue-600 text-sm text-center">
+                <View className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <Text className="text-blue-600 dark:text-blue-400 text-sm text-center">
                         💡 Conseil : Ajoutez votre première activité depuis l'écran d'accueil
                     </Text>
                 </View>
@@ -716,7 +716,7 @@ export default function StatisticsPage() {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
                 <Loading message="Chargement des statistiques..." />
             </SafeAreaView>
         );
@@ -726,7 +726,7 @@ export default function StatisticsPage() {
 
     if (!hasData) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
                 <ScrollView className="flex-1 px-4 pt-4">
                     <StatisticsHeader
                         totalPoints={totalPoints}
@@ -740,7 +740,7 @@ export default function StatisticsPage() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
             <ScrollView className="flex-1 px-4 pt-4">
                 {/* Header amélioré */}
                 <StatisticsHeader
@@ -770,7 +770,7 @@ export default function StatisticsPage() {
 
                 {/* Graphique d'activité hebdomadaire */}
                 <View className="mb-6">
-                    <Text className="text-lg font-semibold text-gray-900 mb-3">
+                    <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                         Activité cette semaine
                     </Text>
                     <WeeklyActivityChart data={weeklyData} />
@@ -778,7 +778,7 @@ export default function StatisticsPage() {
 
                 {/* Graphique de répartition des activités */}
                 <View className="mb-6">
-                    <Text className="text-lg font-semibold text-gray-900 mb-3">
+                    <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                         Répartition des activités
                     </Text>
                     <ActivityDistributionChart data={activityDistribution} />
@@ -786,7 +786,7 @@ export default function StatisticsPage() {
 
                 {/* Liste des badges */}
                 <View className="mb-6">
-                    <Text className="text-lg font-semibold text-gray-900 mb-3">
+                    <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                         Badges ({totalBadges}/{badges.length})
                     </Text>
                     <BadgesList badges={badges} />

@@ -37,30 +37,30 @@ export function ActivityItem({ activity }: ActivityItemProps) {
     const intensity = getIntensityIcon();
 
     return (
-        <View className="flex-row items-center justify-between bg-gray-50 rounded-xl p-5 mb-4 border border-gray-100">
+        <View className="flex-row items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-5 mb-4 border border-gray-100 dark:border-gray-600">
             <View className="flex-row items-center flex-1">
                 <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center mr-4">
                     <Ionicons name="fitness-outline" size={24} color="white" />
                 </View>
                 <View className="flex-1">
-                    <Text className="text-gray-900 font-semibold text-lg mb-2">
+                    <Text className="text-gray-900 dark:text-white font-semibold text-lg mb-2">
                         {activity.name}
                     </Text>
                     <View className="flex-row items-center">
-                        <Text className="text-black text-sm font-medium">
+                        <Text className="text-black dark:text-white text-sm font-medium">
                             {activity.duration}
                         </Text>
-                        <Text className="text-gray-400 mx-2">•</Text>
+                        <Text className="text-gray-400 dark:text-gray-500 mx-2">•</Text>
                         <Ionicons name={intensity.name} size={16} color={intensity.color} />
-                        <Text className="text-black text-sm font-medium ml-1">
+                        <Text className="text-black dark:text-white text-sm font-medium ml-1">
                             {getIntensityText()}
                         </Text>
                     </View>
                 </View>
             </View>
-            <View className="flex-row items-center bg-yellow-100 px-3 py-2 rounded-full">
+            <View className="flex-row items-center bg-yellow-100 dark:bg-yellow-900/30 px-3 py-2 rounded-full">
                 <Ionicons name="star" size={16} color="#F59E0B" />
-                <Text className="text-black font-bold ml-1">
+                <Text className="text-black dark:text-white font-bold ml-1">
                     {activity.points}
                 </Text>
             </View>
