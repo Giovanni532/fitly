@@ -125,7 +125,9 @@ export default function ProfilePage() {
             icon: 'moon-outline',
             type: 'switch' as const,
             value: theme === 'dark',
-            onValueChange: (value: boolean) => setTheme(value ? 'dark' : 'light'),
+            onValueChange: (value: boolean) => {
+                setTheme(value ? 'dark' : 'light');
+            },
         },
         {
             title: 'Réinitialiser la progression',
