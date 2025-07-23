@@ -63,7 +63,6 @@ export default function HomePage() {
 
                 if (lastCheck !== today) {
                     // C'est un nouveau jour, rafraîchir les données
-                    console.log('Nouveau jour détecté, mise à jour des données...');
                     await refreshData();
                     await AsyncStorage.setItem('lastDayCheck', today);
                 }

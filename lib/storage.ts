@@ -153,49 +153,226 @@ export class StorageService {
         }
     }
 
+    // Marquer un défi comme démarré
+    static async startChallenge(challengeId: string): Promise<void> {
+        try {
+            const challenges = await this.getChallenges();
+            const updatedChallenges = challenges.map(challenge =>
+                challenge.id === challengeId
+                    ? { ...challenge, started: true, startedAt: new Date().toISOString() }
+                    : challenge
+            );
+            await this.saveChallenges(updatedChallenges);
+        } catch (error) {
+            console.error('Erreur lors du démarrage du défi:', error);
+        }
+    }
+
+    // Marquer un défi comme complété
+    static async completeChallenge(challengeId: string): Promise<{ success: boolean; pointsEarned: number }> {
+        try {
+            const challenges = await this.getChallenges();
+            const challenge = challenges.find(c => c.id === challengeId);
+
+            if (!challenge) {
+                return { success: false, pointsEarned: 0 };
+            }
+
+            if (challenge.completed) {
+                return { success: false, pointsEarned: 0 };
+            }
+
+            const today = this.getTodayString();
+            const completedChallenges = await this.getCompletedChallenges();
+
+            // Ajouter le défi aux défis complétés du jour
+            if (!completedChallenges[today]) {
+                completedChallenges[today] = [];
+            }
+            completedChallenges[today].push(challengeId);
+            await this.saveCompletedChallenges(completedChallenges);
+
+            // Marquer le défi comme complété
+            const updatedChallenges = challenges.map(c =>
+                c.id === challengeId
+                    ? {
+                        ...c,
+                        completed: true,
+                        doAtThisDate: today,
+                        completedAt: new Date().toISOString()
+                    }
+                    : c
+            );
+            await this.saveChallenges(updatedChallenges);
+
+            // Ajouter les points
+            const newTotalPoints = await this.addPoints(challenge.points);
+
+            // Mettre à jour le streak si nécessaire
+            await this.updateStreakFromActivity(today);
+
+            return { success: true, pointsEarned: challenge.points };
+        } catch (error) {
+            console.error('Erreur lors de la completion du défi:', error);
+            return { success: false, pointsEarned: 0 };
+        }
+    }
+
+    // Mettre à jour le streak basé sur une activité
+    static async updateStreakFromActivity(activityDate: string): Promise<void> {
+        try {
+            const lastActivityDate = await this.getLastActivityDate();
+            const yesterday = this.getYesterdayString();
+
+            if (!lastActivityDate || lastActivityDate === yesterday) {
+                // Nouveau streak ou continuation
+                const currentStreak = await this.getStreak();
+                await this.saveStreak(currentStreak + 1);
+                await this.saveLastActivityDate(activityDate);
+            } else if (lastActivityDate !== activityDate) {
+                // Nouvelle activité après une pause
+                await this.saveStreak(1);
+                await this.saveLastActivityDate(activityDate);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour du streak:', error);
+        }
+    }
+
+    // Réinitialiser tous les défis (pour le développement/test)
+    static async resetAllChallenges(): Promise<void> {
+        try {
+            const defaultChallenges = this.getDefaultChallenges();
+            await this.saveChallenges(defaultChallenges);
+            await this.saveCompletedChallenges({});
+        } catch (error) {
+            console.error('Erreur lors de la réinitialisation des défis:', error);
+        }
+    }
+
     // Méthodes utilitaires
     static getDefaultChallenges(): Challenge[] {
         return [
             {
                 id: '1',
+                name: '30 jours de cardio',
+                description: 'Faites 30 minutes de cardio chaque jour pendant 30 jours',
+                completed: false,
+                points: 500,
+                createdAt: new Date(),
+                type: 'cardio',
+                difficulty: 'medium',
+                duration: '30 jours',
+                intensity: 'moderate'
+            },
+            {
+                id: '2',
+                name: 'Challenge musculation',
+                description: '100 pompes par jour pendant une semaine',
+                completed: false,
+                points: 300,
+                createdAt: new Date(),
+                type: 'muscu',
+                difficulty: 'hard',
+                duration: '7 jours',
+                intensity: 'intense'
+            },
+            {
+                id: '3',
+                name: 'Équilibre quotidien',
+                description: 'Pose d\'équilibre de 5 minutes par jour',
+                completed: false,
+                points: 200,
+                createdAt: new Date(),
+                type: 'equilibre',
+                difficulty: 'easy',
+                duration: '14 jours',
+                intensity: 'light'
+            },
+            {
+                id: '4',
+                name: 'Souplesse matinale',
+                description: 'Étirements de 10 minutes chaque matin',
+                completed: false,
+                points: 150,
+                createdAt: new Date(),
+                type: 'souplesse',
+                difficulty: 'easy',
+                duration: '21 jours',
+                intensity: 'light'
+            },
+            {
+                id: '5',
+                name: 'Marathon virtuel',
+                description: 'Cumulez 42km de course à pied',
+                completed: false,
+                points: 1000,
+                createdAt: new Date(),
+                type: 'cardio',
+                difficulty: 'hard',
+                duration: 'Flexible',
+                intensity: 'intense'
+            },
+            {
+                id: '6',
                 name: '20 squats',
                 description: '3 séries de 20 avec 1 min de pause entre chaque série',
                 completed: false,
                 points: 25,
                 createdAt: new Date(),
+                type: 'muscu',
+                difficulty: 'easy',
+                duration: '1 jour',
+                intensity: 'moderate'
             },
             {
-                id: '2',
+                id: '7',
                 name: '10 pompes',
                 description: '3 séries de 10 avec 1 min de pause entre chaque série',
                 completed: false,
                 points: 30,
                 createdAt: new Date(),
+                type: 'muscu',
+                difficulty: 'medium',
+                duration: '1 jour',
+                intensity: 'moderate'
             },
             {
-                id: '3',
+                id: '8',
                 name: 'Planche 1 minute',
                 description: '3 séries de 1 min avec 1 min de pause entre chaque série',
                 completed: false,
                 points: 20,
                 createdAt: new Date(),
+                type: 'muscu',
+                difficulty: 'easy',
+                duration: '1 jour',
+                intensity: 'light'
             },
             {
-                id: '4',
+                id: '9',
                 name: '30 jumping jacks',
                 description: '2 séries de 30 avec 1 min de pause entre chaque série',
                 completed: false,
                 points: 15,
                 createdAt: new Date(),
+                type: 'cardio',
+                difficulty: 'easy',
+                duration: '1 jour',
+                intensity: 'moderate'
             },
             {
-                id: '5',
+                id: '10',
                 name: '5 burpees',
                 description: '3 séries de 5 avec 1 min de pause entre chaque série',
                 completed: false,
                 points: 35,
                 createdAt: new Date(),
-            },
+                type: 'cardio',
+                difficulty: 'medium',
+                duration: '1 jour',
+                intensity: 'intense'
+            }
         ];
     }
 

@@ -4,9 +4,10 @@ import { CompletedToggle } from '@/components/challenges/CompletedToggle';
 import { EmptyState } from '@/components/challenges/EmptyState';
 import { SearchBar } from '@/components/challenges/SearchBar';
 import { ChallengeCard } from '@/components/home/ChallengeCard';
+import { StorageService } from '@/lib/storage';
 import { Challenge } from '@/lib/types';
-import React, { useMemo, useState } from 'react';
-import { FlatList, ScrollView, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FlatList, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 // Types pour les filtres
 type ChallengeType = 'all' | 'cardio' | 'muscu' | 'souplesse' | 'equilibre';
@@ -82,10 +83,36 @@ export default function ChallengesPage() {
     const [selectedType, setSelectedType] = useState<ChallengeType>('all');
     const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('all');
     const [showCompleted, setShowCompleted] = useState(true);
+    const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges); // Initialiser avec les défis par défaut
+    const [loading, setLoading] = useState(true);
+
+    // Charger les défis au montage du composant
+    useEffect(() => {
+        const loadChallenges = async () => {
+            try {
+                setLoading(true);
+                const loadedChallenges = await StorageService.getChallenges();
+
+                // Si aucun défi n'est chargé, utiliser les défis par défaut
+                if (loadedChallenges.length === 0) {
+                    setChallenges(mockChallenges);
+                } else {
+                    setChallenges(loadedChallenges);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des défis:', error);
+                setChallenges(mockChallenges); // Fallback vers les données de test
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadChallenges();
+    }, []);
 
     // Filtrage des défis
     const filteredChallenges = useMemo(() => {
-        return mockChallenges.filter(challenge => {
+        const filtered = challenges.filter(challenge => {
             // Filtre par recherche
             const matchesSearch = challenge.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 challenge.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -101,16 +128,31 @@ export default function ChallengesPage() {
 
             return matchesSearch && matchesType && matchesDifficulty && matchesStatus;
         });
-    }, [searchQuery, selectedType, selectedDifficulty, showCompleted]);
 
-    const handleStartChallenge = (challengeId: string) => {
-        console.log('Démarrer le défi:', challengeId);
-        // Logique pour démarrer un défi
+        return filtered;
+    }, [challenges, searchQuery, selectedType, selectedDifficulty, showCompleted]);
+
+    const handleStartChallenge = async (challengeId: string) => {
+        try {
+            await StorageService.startChallenge(challengeId);
+            const updatedChallenges = await StorageService.getChallenges();
+            setChallenges(updatedChallenges);
+        } catch (error) {
+            console.error('Erreur lors du démarrage du défi:', error);
+        }
     };
 
-    const handleCompleteChallenge = (challengeId: string) => {
-        console.log('Terminer le défi:', challengeId);
-        // Logique pour terminer un défi
+    const handleCompleteChallenge = async (challengeId: string) => {
+        try {
+            const result = await StorageService.completeChallenge(challengeId);
+
+            if (result.success) {
+                const updatedChallenges = await StorageService.getChallenges();
+                setChallenges(updatedChallenges);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la completion du défi:', error);
+        }
     };
 
     const renderChallengeCard = ({ item }: { item: Challenge }) => (
@@ -136,56 +178,84 @@ export default function ChallengesPage() {
             </View>
 
             <ScrollView className="flex-1 px-4 pt-4">
-                {/* Barre de recherche */}
-                <View className="mb-6">
-                    <SearchBar
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder="Rechercher un défi..."
-                    />
-                </View>
+                {loading ? (
+                    <View className="flex-1 justify-center items-center py-20">
+                        <Text className="text-gray-600 text-lg">Chargement des défis...</Text>
+                    </View>
+                ) : (
+                    <>
+                        {/* Barre de recherche */}
+                        <View className="mb-6">
+                            <SearchBar
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                placeholder="Rechercher un défi..."
+                            />
+                        </View>
 
-                {/* Filtres */}
-                <ChallengeFilters
-                    selectedType={selectedType}
-                    selectedDifficulty={selectedDifficulty}
-                    onTypeChange={setSelectedType}
-                    onDifficultyChange={setSelectedDifficulty}
-                />
-
-                {/* Toggle pour afficher/masquer les défis complétés */}
-                <View className="mb-6">
-                    <CompletedToggle
-                        showCompleted={showCompleted}
-                        onToggle={setShowCompleted}
-                    />
-                </View>
-
-                {/* Statistiques */}
-                <View className="mb-6">
-                    <ChallengeStats
-                        challenges={mockChallenges}
-                        filteredCount={filteredChallenges.length}
-                    />
-                </View>
-
-                {/* Liste des défis */}
-                <View className="mb-6">
-                    <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                        Défis disponibles
-                    </Text>
-                    {filteredChallenges.length === 0 ? (
-                        <EmptyState />
-                    ) : (
-                        <FlatList
-                            data={filteredChallenges}
-                            renderItem={renderChallengeCard}
-                            keyExtractor={(item) => item.id}
-                            scrollEnabled={false}
-                            showsVerticalScrollIndicator={false}
+                        {/* Filtres */}
+                        <ChallengeFilters
+                            selectedType={selectedType}
+                            selectedDifficulty={selectedDifficulty}
+                            onTypeChange={setSelectedType}
+                            onDifficultyChange={setSelectedDifficulty}
                         />
-                    )}
-                </View>
+
+                        {/* Toggle pour afficher/masquer les défis complétés */}
+                        <View className="mb-6">
+                            <CompletedToggle
+                                showCompleted={showCompleted}
+                                onToggle={setShowCompleted}
+                            />
+                        </View>
+
+                        {/* Statistiques */}
+                        <View className="mb-6">
+                            <ChallengeStats
+                                challenges={challenges}
+                                filteredCount={filteredChallenges.length}
+                            />
+                        </View>
+
+                        {/* Bouton de réinitialisation temporaire */}
+                        <View className="mb-6">
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    try {
+                                        await StorageService.resetAllChallenges();
+                                        const updatedChallenges = await StorageService.getChallenges();
+                                        setChallenges(updatedChallenges);
+                                    } catch (error) {
+                                        console.error('Erreur lors de la réinitialisation:', error);
+                                    }
+                                }}
+                                className="bg-red-500 px-4 py-2 rounded-lg"
+                            >
+                                <Text className="text-white text-center font-medium">
+                                    Réinitialiser tous les défis
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Liste des défis */}
+                        <View className="mb-6">
+                            <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                                Défis disponibles
+                            </Text>
+                            {filteredChallenges.length === 0 ? (
+                                <EmptyState />
+                            ) : (
+                                <FlatList
+                                    data={filteredChallenges}
+                                    renderItem={renderChallengeCard}
+                                    keyExtractor={(item) => item.id}
+                                    scrollEnabled={false}
+                                    showsVerticalScrollIndicator={false}
+                                />
+                            )}
+                        </View>
+                    </>
+                )}
             </ScrollView>
         </View>
     );

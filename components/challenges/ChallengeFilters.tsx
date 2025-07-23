@@ -23,7 +23,7 @@ export function ChallengeFilters({
         { id: 'cardio', label: 'Cardio', icon: 'heart' },
         { id: 'muscu', label: 'Muscu', icon: 'fitness' },
         { id: 'souplesse', label: 'Souplesse', icon: 'body' },
-        { id: 'equilibre', label: 'Équilibre', icon: 'balance-scale' }
+        { id: 'equilibre', label: 'Équilibre', icon: 'footsteps' }
     ];
 
     const difficulties = [
@@ -46,8 +46,8 @@ export function ChallengeFilters({
                             key={type.id}
                             onPress={() => onTypeChange(type.id as ChallengeType)}
                             className={`mr-3 px-4 py-2 rounded-full border ${selectedType === type.id
-                                    ? 'bg-blue-500 border-blue-500'
-                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                                ? 'bg-blue-500 border-blue-500'
+                                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                                 }`}
                         >
                             <View className="flex-row items-center">
@@ -59,8 +59,8 @@ export function ChallengeFilters({
                                 />
                                 <Text
                                     className={`font-medium ${selectedType === type.id
-                                            ? 'text-white'
-                                            : 'text-gray-700 dark:text-gray-300'
+                                        ? 'text-white'
+                                        : 'text-gray-700 dark:text-gray-300'
                                         }`}
                                 >
                                     {type.label}
@@ -82,14 +82,14 @@ export function ChallengeFilters({
                             key={difficulty.id}
                             onPress={() => onDifficultyChange(difficulty.id as Difficulty)}
                             className={`mr-3 px-4 py-2 rounded-full border ${selectedDifficulty === difficulty.id
-                                    ? 'bg-blue-500 border-blue-500'
-                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                                ? 'bg-blue-500 border-blue-500'
+                                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                                 }`}
                         >
                             <Text
                                 className={`font-medium ${selectedDifficulty === difficulty.id
-                                        ? 'text-white'
-                                        : 'text-gray-700 dark:text-gray-300'
+                                    ? 'text-white'
+                                    : 'text-gray-700 dark:text-gray-300'
                                     }`}
                             >
                                 {difficulty.label}

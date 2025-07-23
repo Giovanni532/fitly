@@ -10,6 +10,9 @@ export interface Challenge {
     difficulty?: 'easy' | 'medium' | 'hard';
     duration?: string;
     intensity?: 'light' | 'moderate' | 'intense';
+    started?: boolean; // Si le défi a été démarré
+    startedAt?: string; // Date de démarrage du défi
+    completedAt?: string; // Date de completion du défi
 }
 
 export interface Activity {
