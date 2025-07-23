@@ -3,6 +3,7 @@ import { AuthLoading } from '@/components/ui/auth-loading';
 import { useAuth } from '@/contexts/auth-context';
 import React, { useState } from 'react';
 import { View } from 'react-native';
+import ChallengesPage from './challenges';
 import HomePage from './home';
 import ProfilePage from './profile';
 
@@ -19,6 +20,8 @@ export default function AppLayout() {
         switch (activeTab) {
             case 'home':
                 return <HomePage />;
+            case 'challenges':
+                return <ChallengesPage />;
             case 'profile':
                 return <ProfilePage />;
             default:

@@ -21,6 +21,17 @@ export function BottomNavbar({ activeTab, onTabPress }: BottomNavbarProps) {
             ),
         },
         {
+            id: 'challenges',
+            label: 'Défis',
+            icon: (active: boolean) => (
+                <Ionicons
+                    name={active ? 'trophy' : 'trophy-outline'}
+                    size={24}
+                    color={active ? '#3B82F6' : '#6B7280'}
+                />
+            ),
+        },
+        {
             id: 'profile',
             label: 'Profil',
             icon: (active: boolean) => (
@@ -51,8 +62,8 @@ export function BottomNavbar({ activeTab, onTabPress }: BottomNavbarProps) {
                                 {tab.icon(isActive)}
                                 <Text
                                     className={`text-xs font-medium ${isActive
-                                            ? 'text-blue-600 dark:text-blue-400'
-                                            : 'text-gray-500 dark:text-gray-400'
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-500 dark:text-gray-400'
                                         }`}
                                 >
                                     {tab.label}

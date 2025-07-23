@@ -6,6 +6,10 @@ export interface Challenge {
     points: number;
     createdAt: Date;
     doAtThisDate?: string; // Date au format YYYY-MM-DD quand le défi a été complété
+    type?: 'cardio' | 'muscu' | 'souplesse' | 'equilibre';
+    difficulty?: 'easy' | 'medium' | 'hard';
+    duration?: string;
+    intensity?: 'light' | 'moderate' | 'intense';
 }
 
 export interface Activity {
