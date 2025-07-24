@@ -10,12 +10,12 @@ export function AuthTabs() {
         <SafeAreaView className="flex-1 bg-background">
             <View className="flex-1">
                 {/* Tabs */}
-                <View className="flex-row border-b border-border bg-card">
+                <View className="flex-row border-b border-border bg-background">
                     <Pressable
                         onPress={() => setActiveTab('login')}
                         className={`flex-1 py-4 ${activeTab === 'login' ? 'border-b-2 border-primary' : ''}`}
                     >
-                        <Text className={`text-center font-semibold text-base ${activeTab === 'login' ? 'text-primary' : 'text-muted-foreground'}`}>
+                        <Text className={`text-center font-semibold text-base ${activeTab === 'login' ? 'text-primary' : 'text-foreground'}`}>
                             Connexion
                         </Text>
                     </Pressable>
@@ -23,7 +23,7 @@ export function AuthTabs() {
                         onPress={() => setActiveTab('signup')}
                         className={`flex-1 py-4 ${activeTab === 'signup' ? 'border-b-2 border-primary' : ''}`}
                     >
-                        <Text className={`text-center font-semibold text-base ${activeTab === 'signup' ? 'text-primary' : 'text-muted-foreground'}`}>
+                        <Text className={`text-center font-semibold text-base ${activeTab === 'signup' ? 'text-primary' : 'text-foreground'}`}>
                             Inscription
                         </Text>
                     </Pressable>

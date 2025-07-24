@@ -308,7 +308,7 @@ export function SignupForm() {
                                                 disabled={isLoading}
                                                 className="w-full my-2"
                                             >
-                                                <Text className="text-white font-semibold text-base">
+                                                <Text className="text-white dark:text-black font-semibold text-base">
                                                     {isLoading ? 'Création en cours...' : 'Créer un compte'}
                                                 </Text>
                                             </Button>
@@ -326,7 +326,7 @@ export function SignupForm() {
                                             onPress={handleGoogleSignup}
                                             className="w-full h-14 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl flex-row items-center justify-center space-x-3 shadow-sm"
                                         >
-                                            <AntDesign name="google" size={20} color="#000" />
+                                            <AntDesign name="google" size={20} color="gray" />
                                             <Text className="text-gray-700 dark:text-gray-200 font-medium text-base p-4">
                                                 Continuer avec Google
                                             </Text>

@@ -7,11 +7,10 @@ const NOTIFICATIONS_STORAGE_KEY = 'fitly_notifications_enabled';
 // Configuration des notifications
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
         shouldShowBanner: true,
         shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
     }),
 });
 

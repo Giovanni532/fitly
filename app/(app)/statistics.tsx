@@ -167,6 +167,7 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
             value: totalPoints.toLocaleString(),
             icon: 'star',
             color: 'text-yellow-600',
+            iconColor: 'yellow',
             bgColor: 'bg-yellow-50 dark:bg-yellow-900/20'
         },
         {
@@ -174,6 +175,7 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
             value: totalBadges.toString(),
             icon: 'trophy',
             color: 'text-purple-600',
+            iconColor: 'purple',
             bgColor: 'bg-purple-50 dark:bg-purple-900/20'
         },
         {
@@ -181,12 +183,14 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
             value: `${currentStreak} jours`,
             icon: 'flame',
             color: 'text-red-600',
+            iconColor: 'red',
             bgColor: 'bg-red-50 dark:bg-red-900/20'
         },
         {
             title: 'Temps d\'entraînement',
             value: `${totalTrainingTime}h`,
             icon: 'time',
+            iconColor: 'blue',
             color: 'text-blue-600',
             bgColor: 'bg-blue-50 dark:bg-blue-900/20'
         },
@@ -194,6 +198,7 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
             title: 'Jours actifs',
             value: `${activeDaysThisWeek}/7`,
             icon: 'calendar',
+            iconColor: 'green',
             color: 'text-green-600',
             bgColor: 'bg-green-50 dark:bg-green-900/20'
         }
@@ -207,7 +212,7 @@ function StatisticsCards({ totalPoints, totalBadges, currentStreak, totalTrainin
                         <View className="flex-row items-center justify-between">
                             <View className="flex-row items-center flex-1">
                                 <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${stat.bgColor}`}>
-                                    <Ionicons name={stat.icon as any} size={24} className={stat.color} />
+                                    <Ionicons name={stat.icon as any} size={24} color={stat.iconColor} />
                                 </View>
                                 <View className="flex-1">
                                     <Text className="text-gray-600 dark:text-gray-400 text-sm">
